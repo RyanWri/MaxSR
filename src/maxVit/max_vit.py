@@ -1,5 +1,10 @@
-# implementation of maxvit according to MaxVit paper
-# link : https://github.com/qwopqwop200/MaxVIT-pytorch?tab=readme-ov-file
+""" 
+implementation of maxvit according to MaxVit paper
+Please refer to the following repos: 
+    - https://github.com/qwopqwop200/MaxVIT-pytorch?tab=readme-ov-file
+    - https://github.com/ChristophReich1996/MaxViT
+    - https://github.com/hankyul2/maxvit-pytorch    
+"""
 
 import torch
 import torch.nn as nn
