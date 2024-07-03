@@ -9,3 +9,4 @@ pillow
 pytest
 black
 pyclean
+opencv-python
