@@ -176,3 +176,4 @@ def process_and_save_images(hr_folder_path, lr_folder_path, scale_factor=4):
 hr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_HR"
 lr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_LR"
 process_and_save_images(hr_folder, lr_folder, scale_factor=4)
+#k
