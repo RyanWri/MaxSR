@@ -79,10 +79,10 @@ def augment_and_save_images(input_folder_path, output_folder_path, augmentations
         except Exception as e:
             print(f"Error processing image {filename}: {e}")
 
-# Example usage:
-input_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k"
-output_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_scaled"
-#augment_and_save_images(input_folder, output_folder, augmentations=3)
+# # Example usage:
+# input_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k"
+# output_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_scaled"
+# #augment_and_save_images(input_folder, output_folder, augmentations=3)
 
 def duplicate_and_rename_images(folder_path, new_folder_path):
     """
@@ -113,12 +113,12 @@ def duplicate_and_rename_images(folder_path, new_folder_path):
         os.rename(old_path, new_path)
         print(f"Renamed {old_path} to {new_path}")
 
-# Example usage:
-original_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_scaled"
-duplicated_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_HR"
-print("Started duplicating and renaming images")
-#duplicate_and_rename_images(original_folder, duplicated_folder)
-print("Done duplicating and renaming images")
+# # Example usage:
+# original_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_scaled"
+# duplicated_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/Div2k_HR"
+# print("Started duplicating and renaming images")
+# #duplicate_and_rename_images(original_folder, duplicated_folder)
+# print("Done duplicating and renaming images")
 
 def process_image(image, scale_factor=4):
     """
@@ -172,8 +172,7 @@ def process_and_save_images(hr_folder_path, lr_folder_path, scale_factor=4):
         except Exception as e:
             print(f"Error processing {filename}: {e}")
 
-# Example usage:
-hr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_HR"
-lr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_LR"
-process_and_save_images(hr_folder, lr_folder, scale_factor=4)
-#k
+# # Example usage:
+# hr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_HR"
+# lr_folder = "/Users/matanoz/Documents/לימודים תואר שני/סמסטר ב׳/למידה עמוקה/div2k_sample_dataset/DIV2K_train_LR_bicubic/div2k_LR"
+# process_and_save_images(hr_folder, lr_folder, scale_factor=4)
