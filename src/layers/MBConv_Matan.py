@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class SE(nn.Module):
     def __init__(self, in_dim, hidden_dim):
         super(SE, self).__init__()
@@ -10,11 +11,12 @@ class SE(nn.Module):
             nn.Conv2d(in_dim, hidden_dim, 1),
             nn.GELU(),
             nn.Conv2d(hidden_dim, in_dim, 1),
-            nn.Sigmoid()
+            nn.Sigmoid(),
         )
 
     def forward(self, x):
         return x * self.se(x)
+
 
 class MBConv(nn.Module):
     def __init__(
@@ -29,7 +31,7 @@ class MBConv(nn.Module):
     ):
         super(MBConv, self).__init__()
         hidden_dim = int(expand_rate * in_dim)
-        
+
         # 1x1 Conv (Expand Convolution):
         # Expands the number of channels using a 1x1 convolution.
         # Followed by Batch Normalization and GELU activation.
@@ -38,7 +40,7 @@ class MBConv(nn.Module):
             nn.BatchNorm2d(hidden_dim),
             nn.GELU(),
         )
-        
+
         # 3x3 Depthwise Conv:
         # Performs depthwise convolution with a 3x3 kernel, maintaining spatial dimensions and reducing computational complexity.
         # Followed by Batch Normalization and GELU activation.
@@ -55,28 +57,30 @@ class MBConv(nn.Module):
             nn.BatchNorm2d(hidden_dim),
             nn.GELU(),
         )
-        
+
         # Squeeze-and-Excitation Block:
         # Applies a global average pooling to generate channel-wise statistics.
         # Followed by two pointwise convolutions (1x1) and GELU activation to model channel-wise dependencies.
         # Finally, applies a sigmoid activation to scale the input.
         self.se = SE(hidden_dim, max(1, int(in_dim * se_rate)))
-        
+
         # 1x1 Conv (Output Convolution):
         # Uses a 1x1 convolution to project the expanded channels back to the output dimension.
         # Followed by Batch Normalization.
         self.out_conv = nn.Sequential(
-            nn.Conv2d(hidden_dim, out_dim, 1, bias=False), 
-            nn.BatchNorm2d(out_dim)
+            nn.Conv2d(hidden_dim, out_dim, 1, bias=False), nn.BatchNorm2d(out_dim)
         )
-        
+
         # Residual Connection:
         # Ensures the input is directly added to the output.
         # If the input and output dimensions do not match, a 1x1 convolution with Batch Normalization is applied to the input to match dimensions.
-        self.proj = nn.Sequential(
-            nn.Conv2d(in_dim, out_dim, 1, bias=False),
-            nn.BatchNorm2d(out_dim)
-        ) if in_dim != out_dim or stride_size > 1 else nn.Identity()
+        self.proj = (
+            nn.Sequential(
+                nn.Conv2d(in_dim, out_dim, 1, bias=False), nn.BatchNorm2d(out_dim)
+            )
+            if in_dim != out_dim or stride_size > 1
+            else nn.Identity()
+        )
 
     def forward(self, x):
         residual = x
