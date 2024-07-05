@@ -35,7 +35,6 @@ def drop_path(
         random_tensor.div_(keep_prob)
     return x * random_tensor
 
-
 class DropPath(nn.Module):
     def __init__(self, drop_prob: float = 0.0, scale_by_keep: bool = True):
         super(DropPath, self).__init__()
