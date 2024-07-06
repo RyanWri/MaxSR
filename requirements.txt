@@ -10,3 +10,4 @@ pytest
 black
 pyclean
 opencv-python
+PyYAML
