@@ -1,5 +1,14 @@
-from adaptive_maxvit_block import AdaptiveMaxViTBlock
-from sfeb import SFEB
+""" 
+implementation of maxSR according to MaxSr paper
+Please refer to the paper to understand the architecture:
+    https://arxiv.org/abs/2307.07240
+"""
+
+from layers.adaptive_maxvit_block import AdaptiveMaxViTBlock
+from layers.sfeb import SFEB
+from layers.hffb import HFFB
+from layers.reconstruction_block import Reconstruction_block
+
 import torch.nn as nn
 
 
@@ -18,4 +27,5 @@ class MaxSR(nn.Module):
 
         x = HFFB(self.output_blocks) + f_minus_1
 
-        return Reconstruction_block(x)
+        image_output = Reconstruction_block(x)
+        return image_output
