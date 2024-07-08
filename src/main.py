@@ -1,5 +1,5 @@
 from hp.hyper_params import load_config
-from layers.max_sr import MaxSR
+from model.max_sr import MaxSR
 
 
 def create_model(config):
