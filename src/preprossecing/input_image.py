@@ -13,8 +13,3 @@ def load_image(image_path):
     )
     image = Image.open(image_path)
     return transform(image).unsqueeze(0)  # Add batch dimension
-
-
-# Example usage
-image_path = "path/to/your/image.jpg"
-input_image = load_image(image_path)

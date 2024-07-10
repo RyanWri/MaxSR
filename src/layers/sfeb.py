@@ -11,7 +11,7 @@ class SFEB(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size):
         super(SFEB, self).__init__()
         # First convolutional layer: 1 input channel (grayscale image), 64 output channels, 3x3 kernel, padding of 1
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size, padding=1)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
         # Second convolutional layer: 64 input channels (output from first layer), 64 output channels, 3x3 kernel, padding of 1
         self.conv2 = nn.Conv2d(
             in_channels=64, out_channels=64, kernel_size=3, padding=1

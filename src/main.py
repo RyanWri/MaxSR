@@ -1,27 +1,35 @@
-from hp.hyper_params import load_config
+import torch
+import yaml
+import os
 from model.max_sr import MaxSR
-
-
-def create_model(config):
-    model_config = config["model"]
-    sfeb_config = config["sfeb"]
-    ada_grid_att_config = config["adaptive_grid_attention"]
-    hffb_config = config["hffb"]
-    rb_config = config["rb"]
-
-    model = MaxSR(
-        in_channels=model_config["in_channels"],
-        out_channels=model_config["out_channels"],
-        num_blocks=model_config["num_blocks"],
-        grid_size=ada_grid_att_config["grid_size"],
-        hidden_dim=model_config["hidden_dim"],
-        dropout=model_config["dropout"],
-    )
-
-    return model
+from preprossecing.input_image import load_image
+from postprocessing.post_process import postprocess_image
 
 
 if __name__ == "__main__":
-    # Load config and create model
-    config = load_config("config.yaml")
-    model = create_model(config)
+    model_type = "light"
+    if model_type == "light":
+        config_path = "src\config\maxsr_light.yaml"
+    elif model_type == "heavy":
+        config_path = "src\config\maxsr_heavy.yaml"
+    else:
+        raise ValueError(f"Invalid model type: {model_type}")
+
+    with open(config_path, "r") as file:
+        config = yaml.safe_load(file)
+
+    # build model with light or heavy params
+    maxsr_model = MaxSR(config)
+
+    # load data
+    image_path = "images/LR_bicubicx4.jpg"
+    input_tensor = load_image(image_path)
+
+    # Run the model
+    with torch.no_grad():
+        output_tensor = maxsr_model(input_tensor)
+
+    # save as image
+    # Postprocess and display the output image
+    output_image = postprocess_image(output_tensor)
+    output_image.show()

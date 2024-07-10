@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 class MaxSR(nn.Module):
     def __init__(self, config: dict):
         super(MaxSR, self).__init__()
-        self.sfeb = SFEB(config["in_channels"], config["sfeb_channels"])
+        self.sfeb = SFEB(
+            config["in_channels"], config["sfeb_channels"], config["kernel_size"]
+        )
         self.adaptive_maxvit_blocks = nn.ModuleList(
             [
                 AdaptiveMaxViTBlock(

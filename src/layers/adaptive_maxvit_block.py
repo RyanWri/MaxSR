@@ -1,6 +1,6 @@
-from mb_conv_with_se import MBConv
-from adaptive_block_sa import AdaptiveBlockSelfAttention
-from adaptive_grid_attention import AdaptiveGridSelfAttention
+from layers.mb_conv_with_se import MBConv
+from layers.adaptive_block_sa import AdaptiveBlockSelfAttention
+from layers.adaptive_grid_attention import AdaptiveGridSelfAttention
 import torch.nn as nn
 
 
