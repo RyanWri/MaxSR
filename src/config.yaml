@@ -1,0 +1,23 @@
+model:
+  in_channels: 3
+  out_channels: 3
+  num_blocks: 4
+  grid_size: 8
+  hidden_dim: 64
+  dropout: 0.1
+
+sfeb:
+  out_channels: 64
+
+adaptive_grid_attention:
+  grid_size: 8
+  hidden_dim: 64
+  dropout: 0.1
+
+hffb:
+  in_channels: 64
+
+rb:
+  in_channels: 64
+  out_channels: 3
+  upscale_factor: 2
