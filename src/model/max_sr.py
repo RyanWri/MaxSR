@@ -17,21 +17,17 @@ logger = logging.getLogger(__name__)
 class MaxSR(nn.Module):
     def __init__(self, config: dict):
         super(MaxSR, self).__init__()
-        self.sfeb = SFEB(
-            config["in_channels"], config["sfeb_channels"], config["kernel_size"]
-        )
+        self.sfeb = SFEB(**config["SFEB"])
+        self.num_blocks = config["AMTBs"]["num_blocks"]
+        self.num_stages = config["AMTBs"]["num_stages"]
         self.adaptive_maxvit_blocks = nn.ModuleList(
             [
-                AdaptiveMaxViTBlock(
-                    config["sfeb_channels"], config["num_heads"], config["ffn_dim"]
-                )
-                for _ in range(config["num_blocks"])
+                AdaptiveMaxViTBlock(**config["AMTBs"]["block_settings"])
+                for i in range(self.num_blocks)
             ]
         )
-        self.hffb = HierarchicalFeatureFusionBlock(config["sfeb_channels"])
-        self.rb = ReconstructionBlock(
-            config["sfeb_channels"], config["out_channels"], config["upscale_factor"]
-        )
+        self.hffb = HierarchicalFeatureFusionBlock(**config["HFFB"])
+        self.rb = ReconstructionBlock(**config["RB"])
         self.output_blocks = []
         self.len_blocks = len(self.adaptive_maxvit_blocks)
 
@@ -43,10 +39,17 @@ class MaxSR(nn.Module):
 
         # Cascaded Adaptive MaxVit Blocks
         block_output = F0
-        for i, block in enumerate(self.adaptive_maxvit_blocks):
-            logger.info(f"Running Block {i} / {self.len_blocks}")
-            block_output = block(block_output)
-            features_map.append(block_output)
+        blocks_per_stage = self.num_blocks // self.num_stages
+        for stage in range(self.num_stages):
+            logger.info(f"Running Stage {stage}")
+            for i in range(blocks_per_stage):
+                logger.info(f"Running Block {i} / {blocks_per_stage}")
+                block_output = self.adaptive_maxvit_blocks[
+                    (stage * blocks_per_stage) + i
+                ](block_output)
+                features_map.append(block_output)
+
+            logger.info(f"Completed Stage {stage} ")
 
         # HFFB Part
         hffb_output = self.hffb(F_minus1, features_map)

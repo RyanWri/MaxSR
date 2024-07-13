@@ -12,6 +12,8 @@ if __name__ == "__main__":
         config_path = "src\config\maxsr_light.yaml"
     elif model_type == "heavy":
         config_path = "src\config\maxsr_heavy.yaml"
+    elif model_type == "test":
+        config_path = "src\config\test.yaml"
     else:
         raise ValueError(f"Invalid model type: {model_type}")
 

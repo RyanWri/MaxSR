@@ -1,0 +1,20 @@
+maxsr_light:
+  SFEB:
+    in_channels: 3
+    out_channels: 48
+  AMTBs:
+    num_blocks: 8
+    num_stages: 2
+    block_settings:
+      in_channels: 48
+      out_channels: 48
+      num_heads: 1
+      window_size: 7
+      grid_size: 7
+  HFFB:
+    in_channels: 48
+    out_channels: 48
+  RB:
+    in_channels: 48
+    out_channels: 3
+    scale_factor: 4
