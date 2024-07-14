@@ -7,13 +7,13 @@ from postprocessing.post_process import postprocess_image
 
 
 if __name__ == "__main__":
-    model_type = "light"
+    model_type = "test"
     if model_type == "light":
-        config_path = "src\config\maxsr_light.yaml"
+        config_path = "src/config/maxsr_light.yaml"
     elif model_type == "heavy":
-        config_path = "src\config\maxsr_heavy.yaml"
+        config_path = "src/config/maxsr_heavy.yaml"
     elif model_type == "test":
-        config_path = "src\config\test.yaml"
+        config_path = "src/config/test.yaml"
     else:
         raise ValueError(f"Invalid model type: {model_type}")
 
