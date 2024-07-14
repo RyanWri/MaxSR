@@ -5,9 +5,11 @@ import torch.nn as nn
 
 
 class AdaptiveMaxViTBlock(nn.Module):
-    def __init__(self, in_channels, config):
+    def __init__(self, config):
         super(AdaptiveMaxViTBlock, self).__init__()
-        self.mb_conv = MBConv(in_channels, config)
+        in_channels = config.get("in_channels", None)
+        out_channels = config.get("out_channels", None)
+        self.mb_conv = MBConv(in_channels, out_channels)
         self.adaptive_block_sa = AdaptiveBlockSelfAttention(in_channels, config)
         self.adaptive_grid_sa = AdaptiveGridSelfAttention(in_channels, config)
 

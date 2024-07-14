@@ -4,9 +4,9 @@ from layers.ffn import FFN
 
 
 class AdaptiveBlockSelfAttention(nn.Module):
-    def __init__(self, in_channels, block_size, config):
+    def __init__(self, config):
         super(AdaptiveBlockSelfAttention, self).__init__()
-        self.in_channels = in_channels
+        in_channels = config.get("in_channels", None)
         self.block_size = block_size
         self.query_conv = nn.Conv2d(in_channels, in_channels, kernel_size=1)
         self.key_conv = nn.Conv2d(in_channels, in_channels, kernel_size=1)
@@ -16,9 +16,6 @@ class AdaptiveBlockSelfAttention(nn.Module):
 
     def forward_adaptive_block_sa(self, x):
         B, C, H, W = x.shape
-        assert (
-            H % self.block_size == 0 and W % self.block_size == 0
-        ), "Height and Width must be divisible by block size"
 
         # Unfold the input into blocks
         blocks = x.unfold(2, self.block_size, self.block_size).unfold(
