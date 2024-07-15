@@ -51,6 +51,14 @@ if __name__ == "__main__":
     logger.info("completed... MBConv with Squeeze and Excitation STAGE...")
     logger.info("Completed... ADAPTIVE MAXVIT BLOCKS STAGE...")
 
+    """
+        TODO : Add Adaptive Block Attention (adaptive_block_sa + ffn)
+        TODO : Add Adaptive Grid Attention (adaptive_grid_sa + ffn)
+        TODO : Add HFFB (HierarchicalFeatureFusionBlock)
+        TODO : Add ReconstructionBlock
+        TODO : Plot the reconstructed image
+    """
+
 
 """
     adaptive_maxvit_block = nn.ModuleList(

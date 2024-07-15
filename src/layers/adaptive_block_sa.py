@@ -1,48 +1,70 @@
 import torch
 import torch.nn as nn
-from layers.ffn import FFN
 
 
 class AdaptiveBlockSelfAttention(nn.Module):
     def __init__(self, config):
         super(AdaptiveBlockSelfAttention, self).__init__()
-        in_channels = config.get("in_channels", None)
-        self.block_size = block_size
-        self.query_conv = nn.Conv2d(in_channels, in_channels, kernel_size=1)
-        self.key_conv = nn.Conv2d(in_channels, in_channels, kernel_size=1)
-        self.value_conv = nn.Conv2d(in_channels, in_channels, kernel_size=1)
-        self.softmax = nn.Softmax(dim=-1)
-        self.ffn = FFN(in_channels, config.hidden_dim)
+        self.in_channels = config.get("in_channels")
+        self.block_size = config.get("block_size", 16)  # Default block size
+        self.num_heads = config.get("num_heads", 4)  # Default number of heads
+        self.head_dim = self.in_channels // self.num_heads
 
-    def forward_adaptive_block_sa(self, x):
+        if self.in_channels % self.num_heads != 0:
+            raise ValueError("in_channels must be divisible by num_heads")
+
+        self.query_conv = nn.Conv2d(
+            self.in_channels, self.in_channels, kernel_size=1, bias=False
+        )
+        self.key_conv = nn.Conv2d(
+            self.in_channels, self.in_channels, kernel_size=1, bias=False
+        )
+        self.value_conv = nn.Conv2d(
+            self.in_channels, self.in_channels, kernel_size=1, bias=False
+        )
+        self.softmax = nn.Softmax(dim=-1)
+        self.out_projection = nn.Conv2d(
+            self.in_channels, self.in_channels, kernel_size=1, bias=False
+        )
+        self.norm = nn.LayerNorm(self.in_channels)
+
+    def forward(self, x):
         B, C, H, W = x.shape
 
+        # Reshape and permute the input tensor to form B, num_heads, head_dim, H, W
+        x = x.view(B, self.num_heads, self.head_dim, H, W)
+
         # Unfold the input into blocks
-        blocks = x.unfold(2, self.block_size, self.block_size).unfold(
-            3, self.block_size, self.block_size
+        unfolded = x.unfold(3, self.block_size, self.block_size).unfold(
+            4, self.block_size, self.block_size
         )
-        B, C, num_blocks_h, num_blocks_w, block_h, block_w = blocks.shape
-        blocks = blocks.contiguous().view(B, C, -1, block_h * block_w)
+        B, nH, d, num_blocks_h, num_blocks_w, block_h, block_w = unfolded.shape
 
-        # Compute Q, K, V matrices
-        Q = self.query_conv(blocks).view(B, C, -1, block_h * block_w)
-        K = self.key_conv(blocks).view(B, C, -1, block_h * block_w)
-        V = self.value_conv(blocks).view(B, C, -1, block_h * block_w)
+        unfolded = unfolded.contiguous().view(B, nH, d, -1, block_h * block_w)
 
-        # Compute attention scores
-        attention_scores = torch.matmul(Q.transpose(-2, -1), K) / (C**0.5)
+        # Separate Q, K, V
+        Q = self.query_conv(unfolded)
+        K = self.key_conv(unfolded)
+        V = self.value_conv(unfolded)
+
+        # Scaled Dot-Product Attention
+        attention_scores = torch.einsum("bnhdk,bnhdj->bnhkj", Q, K) / (d**0.5)
         attention_weights = self.softmax(attention_scores)
 
         # Apply attention weights to values
-        out = torch.matmul(attention_weights, V)
-        out = out.view(B, C, num_blocks_h, num_blocks_w, block_h, block_w)
-        out = out.contiguous().view(B, C, H, W)
+        weighted_values = torch.einsum("bnhkj,bnhdj->bnhdk", attention_weights, V)
+
+        # Reshape to the original unfolded size
+        weighted_values = weighted_values.contiguous().view(
+            B, self.in_channels, num_blocks_h, num_blocks_w, block_h, block_w
+        )
+        weighted_values = weighted_values.contiguous().view(B, self.in_channels, H, W)
+
+        # Project back to the original dimension and apply output projection
+        out = self.out_projection(weighted_values)
+        out = out + x  # Skip connection
+
+        # Normalize
+        out = self.norm(out)
 
         return out
-
-    def forward(self, x):
-        # x = x + output(Adaptive block-sa(x))
-        x = x + self.forward_adaptive_block_sa(x)
-        # x = x + output(FFN(x))
-        x = x + self.ffn(x)
-        return x
