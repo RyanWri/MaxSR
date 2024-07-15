@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from ffn import FFN
+from layers.ffn import FFN
 
 
 class AdaptiveGridSelfAttention(nn.Module):

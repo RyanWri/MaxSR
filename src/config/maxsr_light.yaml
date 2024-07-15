@@ -1,0 +1,13 @@
+in_channels: 3
+out_channels: 3
+sfeb_channels: 48
+num_blocks: 8
+blocks_per_stage: 2
+num_stages: 4
+num_heads: 4
+ffn_dim: 192
+upscale_factor: 2
+kernel_size: 3
+attention_kernel_size: 1
+batch_size: 32
+lr: 2e-4

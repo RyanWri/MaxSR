@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class ReconstructionBlock(nn.Module):
     def __init__(
         self,
@@ -9,7 +10,7 @@ class ReconstructionBlock(nn.Module):
         kernel_size=3,
         stride_size=1,
         expand_rate=4,
-        upscale_factor=2
+        upscale_factor=2,
     ):
         super(ReconstructionBlock, self).__init__()
         hidden_dim = int(expand_rate * in_dim)
@@ -37,11 +38,11 @@ class ReconstructionBlock(nn.Module):
 
         # Final convolution layer
         self.conv = nn.Conv2d(
-            hidden_dim // (upscale_factor ** 2),
+            hidden_dim // (upscale_factor**2),
             out_dim,
             kernel_size,
             stride=1,
-            padding=kernel_size // 2
+            padding=kernel_size // 2,
         )
 
     def forward(self, x):
@@ -50,6 +51,7 @@ class ReconstructionBlock(nn.Module):
         x = self.pixel_shuffle(x)  # Upscale the input tensor
         x = self.conv(x)  # Refine the upscaled features
         return x
+
 
 # Example usage:
 # Assuming in_dim is 64, out_dim is 3 (for RGB), and upscale_factor is 2
