@@ -2,6 +2,7 @@ from layers.mb_conv_with_se import MBConv
 from preprossecing.input_image import load_image, preprocess_image
 from layers.sfeb import SFEB
 from layers.adaptive_maxvit_block import AdaptiveMaxViTBlock
+from layers.adaptive_block_attention import AdaptiveBlockAttention
 import yaml
 import logging
 import torch.nn as nn
@@ -49,15 +50,21 @@ if __name__ == "__main__":
     mb_conv = MBConv(amtb_config["in_channels"], amtb_config["out_channels"])
     mb_conv_output = mb_conv(f_0)
     logger.info("completed... MBConv with Squeeze and Excitation STAGE...")
-    logger.info("Completed... ADAPTIVE MAXVIT BLOCKS STAGE...")
+
+    # TODO : Add Adaptive Block Attention (adaptive_block_sa + ffn)
+    logger.info("Starting... Adaptive Block Attention STAGE...")
+    adaptive_block = AdaptiveBlockAttention(config)
+    adaptive_block_output = adaptive_block(mb_conv_output)
+    logger.info("Completed... Adaptive Block Attention STAGE...")
 
     """
-        TODO : Add Adaptive Block Attention (adaptive_block_sa + ffn)
         TODO : Add Adaptive Grid Attention (adaptive_grid_sa + ffn)
         TODO : Add HFFB (HierarchicalFeatureFusionBlock)
         TODO : Add ReconstructionBlock
         TODO : Plot the reconstructed image
     """
+
+    logger.info("Completed... ADAPTIVE MAXVIT BLOCKS STAGE...")
 
 
 """
