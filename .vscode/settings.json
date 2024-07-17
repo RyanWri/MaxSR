@@ -1,5 +1,3 @@
 {
-    "python.analysis.extraPaths": [
-        "C:\\Afeka\\MaxSR\\src"
-    ]
+  "python.analysis.extraPaths": ["C:\\Afeka\\MaxSR"]
 }
