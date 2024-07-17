@@ -4,18 +4,14 @@ import torch
 # Adjust the import based on your actual module structure
 from src.layers.adaptive_block_attention import AdaptiveBlockAttention
 
-# Configuration for the AdaptiveBlockAttention
 config = {
-    "self_attention": {
-        "in_channels": 64,  # Example: 64 input channels
-        "block_size": 16,  # Example: 16x16 blocks
-        "num_heads": 8,  # Example: 8 attention heads
-    },
-    "ffn": {
-        "in_channels": 64,  # Should match in_channels of self_attention
-        "hidden_dim": 256,  # Example: Larger hidden dimension for FFN
-        "dropout": 0.1,  # Example: Dropout rate
-    },
+    "in_channels": 48,
+    "out_channels": 48,
+    "num_heads": 4,
+    "hidden_dim": 128,
+    "kernel_size": 3,
+    "ffn_in_channels": 48,
+    "ffn_out_channels": 48,
 }
 
 
@@ -28,7 +24,7 @@ def model():
 @pytest.fixture
 def dummy_input():
     # Dummy input tensor (batch_size, channels, height, width)
-    return torch.rand(2, 64, 64, 64)  # Example: batch size of 2, 64x64 image
+    return torch.rand(1, 48, 256, 256)
 
 
 def test_output_shape(model, dummy_input):

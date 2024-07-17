@@ -14,11 +14,11 @@ class SFEB(nn.Module):
     The SFEB consists of two convolutional layers without activation functions.
     """
 
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, in_channels, out_channels, kernel_size):
         super(SFEB, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size, padding=1)
         # the second layers gets it's input from the first layer
-        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1)
+        self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size, padding=1)
 
     def forward(self, x):
         """

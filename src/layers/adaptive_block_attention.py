@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
-from layers.adaptive_block_self_attention import AdaptiveBlockSelfAttention
-from layers.ffn import FFN
+from src.layers.adaptive_block_self_attention import AdaptiveBlockSelfAttention
+from src.layers.ffn import FFN
 import logging
 
 logging.basicConfig(
@@ -14,14 +14,10 @@ class AdaptiveBlockAttention(nn.Module):
     def __init__(self, config):
         super(AdaptiveBlockAttention, self).__init__()
         # Initialize the Self-Attention component
-        self.adaptive_block_sa = AdaptiveBlockSelfAttention(config["self_attention"])
+        self.adaptive_block_sa = AdaptiveBlockSelfAttention(config)
 
         # Initialize the Feed-Forward Network component
-        self.ffn = FFN(
-            config["ffn"]["in_channels"],
-            config["ffn"]["hidden_dim"],
-            config["ffn"]["dropout"],
-        )
+        self.ffn = FFN(config)
 
     def forward(self, x):
         logger.info("Starting... Adaptive Block Attention STAGE...")

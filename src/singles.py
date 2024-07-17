@@ -24,13 +24,14 @@ def load_model_config(model_type: str) -> dict:
         raise ValueError(f"Invalid model type: {model_type}")
 
     with open(config_path, "r") as file:
-        config = yaml.safe_load(file).get("maxsr_light")
+        config = yaml.safe_load(file)
 
     return config
 
 
 if __name__ == "__main__":
-    config = load_model_config(model_type="test")
+    config = load_model_config(model_type="light")
+    config = config["MaxSR-Light"]
 
     logger.info("Starting... LOADING IMAGE...")
     image_path = "C:\\datasets/DIV2K/Dataset/DIV2K_train_LR_bicubic/X2/0001x2.png"
@@ -39,21 +40,19 @@ if __name__ == "__main__":
     logger.info("Completed... LOADING IMAGE...")
 
     logger.info("Starting... SFEB STAGE...")
-    sfeb = SFEB(**config["SFEB"])
+    sfeb = SFEB(**config["sfeb"])
     sfeb_output = sfeb(input_tensor)
     f_minus_1, f_0 = sfeb_output
     logger.info("Completed... SFEB STAGE...")
 
     logger.info("Starting... ADAPTIVE MAXVIT BLOCKS STAGE...")
     logger.info("Starting... MBConv with Squeeze and Excitation STAGE...")
-    amtb_config = config["AMTBs"]["block_settings"]
-    mb_conv = MBConv(amtb_config["in_channels"], amtb_config["out_channels"])
+    mb_conv = MBConv(config["mbconv"]["in_channels"], config["mbconv"]["out_channels"])
     mb_conv_output = mb_conv(f_0)
     logger.info("completed... MBConv with Squeeze and Excitation STAGE...")
 
     # TODO : Add Adaptive Block Attention (adaptive_block_sa + ffn)
-    logger.info("Starting... Adaptive Block Attention STAGE...")
-    adaptive_block = AdaptiveBlockAttention(config)
+    adaptive_block = AdaptiveBlockAttention(config["adaptive_block_attention"])
     adaptive_block_output = adaptive_block(mb_conv_output)
     logger.info("Completed... Adaptive Block Attention STAGE...")
 
