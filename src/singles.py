@@ -1,3 +1,4 @@
+from layers.mb_conv_with_se import MBConv
 from preprossecing.input_image import load_image, preprocess_image
 from layers.sfeb import SFEB
 from layers.adaptive_maxvit_block import AdaptiveMaxViTBlock
@@ -11,8 +12,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def load_model_config(model_type: str = "test") -> dict:
-    model_type = "test"
+def load_model_config(model_type: str) -> dict:
     if model_type == "light":
         config_path = "src/config/maxsr_light.yaml"
     elif model_type == "heavy":
@@ -40,11 +40,30 @@ if __name__ == "__main__":
     logger.info("Starting... SFEB STAGE...")
     sfeb = SFEB(**config["SFEB"])
     sfeb_output = sfeb(input_tensor)
+    f_minus_1, f_0 = sfeb_output
     logger.info("Completed... SFEB STAGE...")
 
     logger.info("Starting... ADAPTIVE MAXVIT BLOCKS STAGE...")
+    logger.info("Starting... MBConv with Squeeze and Excitation STAGE...")
+    amtb_config = config["AMTBs"]["block_settings"]
+    mb_conv = MBConv(amtb_config["in_channels"], amtb_config["out_channels"])
+    mb_conv_output = mb_conv(f_0)
+    logger.info("completed... MBConv with Squeeze and Excitation STAGE...")
+    logger.info("Completed... ADAPTIVE MAXVIT BLOCKS STAGE...")
+
+    """
+        TODO : Add Adaptive Block Attention (adaptive_block_sa + ffn)
+        TODO : Add Adaptive Grid Attention (adaptive_grid_sa + ffn)
+        TODO : Add HFFB (HierarchicalFeatureFusionBlock)
+        TODO : Add ReconstructionBlock
+        TODO : Plot the reconstructed image
+    """
+
+
+"""
     adaptive_maxvit_block = nn.ModuleList(
         [AdaptiveMaxViTBlock(config["AMTBs"]["block_settings"]) for i in range(1)]
     )
     amtbs_output = adaptive_maxvit_block(sfeb_output)
-    logger.info("Completed... ADAPTIVE MAXVIT BLOCKS STAGE...")
+    
+"""
