@@ -1,5 +1,7 @@
 import torch
 from torchvision import transforms
+import matplotlib.pyplot as plt
+import torchvision.transforms.functional as TF
 
 
 # Define image postprocessing function
@@ -10,3 +12,21 @@ def postprocess_image(tensor):
     tensor = torch.clamp(tensor, 0, 1)
     image = transforms.ToPILImage()(tensor)
     return image
+
+
+def visualize_feature_maps(feature_maps):
+    # Assume feature_maps is a tensor of shape (B, C, H, W)
+    feature_map = feature_maps[0]  # Take the first in the batch for visualization
+
+    # Normalize the feature map for better visualization
+    feature_map -= feature_map.min()
+    feature_map /= feature_map.max()
+
+    # Convert to numpy and display
+    feature_map = feature_map.detach().cpu().numpy()
+
+    fig, axes = plt.subplots(nrows=1, ncols=feature_map.shape[0], figsize=(20, 2))
+    for i, ax in enumerate(axes):
+        ax.imshow(feature_map[i], cmap="gray")
+        ax.axis("off")
+    plt.show()
