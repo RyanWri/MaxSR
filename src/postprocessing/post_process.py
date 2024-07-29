@@ -42,3 +42,22 @@ def visualize_attention_feature_maps(feature_maps, title="Feature Map"):
         ax.axis("off")
     plt.suptitle(title)
     plt.show()
+
+
+import matplotlib.pyplot as plt
+
+
+def visualize_hffb_feature_maps(feature_maps, title="Feature Map", num_maps=16):
+    # Assuming feature_maps shape is [1, channels, H, W]
+    feature_map = feature_maps[0].detach().cpu()  # Take the first batch
+
+    # Setup plot
+    fig, axes = plt.subplots(1, num_maps, figsize=(20, 2))
+    for i, ax in enumerate(axes):
+        if i < feature_map.shape[0]:
+            ax.imshow(feature_map[i], cmap="gray")
+            ax.axis("off")
+        else:
+            ax.axis("off")
+    plt.suptitle(title)
+    plt.show()

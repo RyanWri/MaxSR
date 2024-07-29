@@ -5,7 +5,9 @@ from PIL import Image
 from postprocessing.post_process import (
     visualize_feature_maps,
     visualize_attention_feature_maps,
+    visualize_hffb_feature_maps,
 )
+from components.hffb import HierarchicalFeatureFusionBlock
 
 
 # Assuming `image` is your input PIL Image
@@ -45,6 +47,17 @@ if __name__ == "__main__":
     print("Shape of output after Adaptive MaxViT Block:", F0_adaptive.shape)
 
     # try to visualize adaptive maxvit block feature maps
-    visualize_attention_feature_maps(
-        F0_adaptive, title="Output after Adaptive MaxViT Block"
-    )
+    # visualize_attention_feature_maps(
+    #     F0_adaptive, title="Output after Adaptive MaxViT Block"
+    # )
+
+    # Example instantiation and application of HFFB
+    # Assuming outputs from various stages are stored in `features_list` which is a list of tensors
+    features_list = [*F0_adaptive]
+    hffb = HierarchicalFeatureFusionBlock(channels=16, num_levels=len(features_list))
+    fused_features = hffb(*features_list)
+
+    print("Shape of fused features:", fused_features.shape)
+
+    # Visualize hierarchical feature fusion block feature maps
+    visualize_hffb_feature_maps(fused_features, title="Fused Features from HFFB")
