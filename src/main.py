@@ -1,8 +1,13 @@
 import torchvision.transforms.functional as TF
 from layers.sfeb import ShallowFeatureExtractionBlock
 from components.mb_conv_with_se import MBConvSE
+from components.block_attention import BlockAttention
+from components.grid_attention import GridAttention
 from PIL import Image
-from postprocessing.post_process import visualize_feature_maps
+from postprocessing.post_process import (
+    visualize_feature_maps,
+    visualize_attention_feature_maps,
+)
 
 
 # Assuming `image` is your input PIL Image
@@ -44,5 +49,23 @@ if __name__ == "__main__":
 
     print("Shape of output after MBConvSE:", F0_se.shape)
 
-    # Visualize feature maps
-    visualize_feature_maps(F0_se)
+    # Example instantiation and application
+    block_attention = BlockAttention(dim=16, num_heads=4, block_size=8)
+    F0_attended = block_attention(F0_se)  # F0_se is the output from MBConvSE
+
+    print("Shape of output after Block Attention:", F0_attended.shape)
+    # try to visualize attention feature maps
+    # visualize_attention_feature_maps(F0_attended, title="Output after Block Attention")
+
+    # Example instantiation and application
+    grid_attention = GridAttention(dim=16, num_heads=4)
+    F0_grid_attended = grid_attention(
+        F0_attended
+    )  # Apply grid attention on the output from block attention
+
+    print("Shape of output after Grid Attention:", F0_grid_attended.shape)
+
+    # try to visualize grid attention feature maps
+    visualize_attention_feature_maps(
+        F0_grid_attended, title="Output after Grid Attention"
+    )

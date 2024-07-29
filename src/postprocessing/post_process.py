@@ -30,3 +30,15 @@ def visualize_feature_maps(feature_maps):
         ax.imshow(feature_map[i], cmap="gray")
         ax.axis("off")
     plt.show()
+
+
+def visualize_attention_feature_maps(feature_maps, title="Feature Map"):
+    # Assuming feature_maps shape is (1, C, H, W)
+    feature_map = feature_maps[0].detach().cpu()
+
+    fig, axs = plt.subplots(1, feature_map.shape[0], figsize=(20, 2))
+    for i, ax in enumerate(axs):
+        ax.imshow(feature_map[i], cmap="gray")
+        ax.axis("off")
+    plt.suptitle(title)
+    plt.show()
