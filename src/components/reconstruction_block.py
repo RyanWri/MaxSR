@@ -1,4 +1,11 @@
 import torch.nn as nn
+import logging
+
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class ReconstructionBlock(nn.Module):
@@ -12,6 +19,8 @@ class ReconstructionBlock(nn.Module):
         )
 
     def forward(self, x):
+        logger.info(f"ReconstructionBlock input shape: {x.shape}")
         x = self.pixel_shuffle(x)
         x = self.final_conv(x)
+        logger.info(f"ReconstructionBlock output shape: {x.shape}")
         return x
