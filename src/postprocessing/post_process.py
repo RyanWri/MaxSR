@@ -44,20 +44,23 @@ def visualize_attention_feature_maps(feature_maps, title="Feature Map"):
     plt.show()
 
 
-import matplotlib.pyplot as plt
-
-
-def visualize_hffb_feature_maps(feature_maps, title="Feature Map", num_maps=16):
-    # Assuming feature_maps shape is [1, channels, H, W]
+def visualize_hffb_feature_maps(feature_maps, title="Feature Map"):
     feature_map = feature_maps[0].detach().cpu()  # Take the first batch
-
-    # Setup plot
-    fig, axes = plt.subplots(1, num_maps, figsize=(20, 2))
-    for i, ax in enumerate(axes):
-        if i < feature_map.shape[0]:
-            ax.imshow(feature_map[i], cmap="gray")
-            ax.axis("off")
-        else:
-            ax.axis("off")
+    plt.figure(figsize=(15, 10))
+    for i in range(1, 5):  # Visualizing the first 4 feature maps for simplicity
+        ax = plt.subplot(1, 4, i)
+        ax.imshow(feature_map[i], cmap="gray")
+        ax.axis("off")
     plt.suptitle(title)
+    plt.show()
+
+
+# Function to visualize the output image
+def visualize_RB_output_image(tensor, title="Reconstructed Image"):
+    image = tensor[0].detach().cpu()  # Take the first in the batch
+    image = image.permute(1, 2, 0)  # Change from (C, H, W) to (H, W, C)
+    image = (image - image.min()) / (image.max() - image.min())
+    plt.imshow(image)
+    plt.title(title)
+    plt.axis("off")
     plt.show()

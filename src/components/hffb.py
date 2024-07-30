@@ -1,18 +1,20 @@
+import torch
 import torch.nn as nn
 
 
 class HierarchicalFeatureFusionBlock(nn.Module):
-    def __init__(self, channels, num_levels):
+    def __init__(self, channels, num_features):
         super(HierarchicalFeatureFusionBlock, self).__init__()
-        # Assumes features from `num_levels` different blocks or layers
-        self.fusion_layers = nn.ModuleList(
-            [nn.Conv2d(channels, channels, kernel_size=1) for _ in range(num_levels)]
-        )
-        self.relu = nn.ReLU(inplace=True)
+        self.concat_conv = nn.Conv2d(channels * num_features, channels, kernel_size=1)
+        self.final_conv = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
 
-    def forward(self, *features):
-        # Assume that features are passed in as a sequence of feature maps
-        fused_feature = 0
-        for feature, layer in zip(features, self.fusion_layers):
-            fused_feature += layer(feature)
-        return self.relu(fused_feature)
+    def forward(self, features, F_minus_1):
+        # Concatenate features from different stages
+        concatenated_features = torch.cat(features, dim=1)
+        # Apply 1x1 convolution
+        x = self.concat_conv(concatenated_features)
+        # Apply 3x3 convolution
+        x = self.final_conv(x)
+        # Add the output of the first convolution layer of SFEB
+        x += F_minus_1
+        return x

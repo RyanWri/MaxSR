@@ -1,13 +1,15 @@
 import torchvision.transforms.functional as TF
-from layers.sfeb import ShallowFeatureExtractionBlock
-from components.adaptive_maxvit_block import AdaptiveMaxViTBlock
 from PIL import Image
 from postprocessing.post_process import (
     visualize_feature_maps,
     visualize_attention_feature_maps,
     visualize_hffb_feature_maps,
+    visualize_RB_output_image,
 )
+from components.sfeb import ShallowFeatureExtractionBlock
+from components.adaptive_maxvit_block import AdaptiveMaxViTBlock
 from components.hffb import HierarchicalFeatureFusionBlock
+from components.reconstruction_block import ReconstructionBlock
 
 
 # Assuming `image` is your input PIL Image
@@ -15,6 +17,7 @@ def process_image(image, out_channels):
     # Resize and possibly crop the image to 64x64
     image = TF.resize(image, (64, 64))
     image = TF.to_tensor(image).unsqueeze(0)  # Add batch dimension
+    visualize_RB_output_image(image, title="Input Image")
 
     # Initialize SFEB with 1 input channel (grayscale) or 3 (RGB), and some number of output channels
     sfeb = ShallowFeatureExtractionBlock(
@@ -51,13 +54,28 @@ if __name__ == "__main__":
     #     F0_adaptive, title="Output after Adaptive MaxViT Block"
     # )
 
-    # Example instantiation and application of HFFB
-    # Assuming outputs from various stages are stored in `features_list` which is a list of tensors
-    features_list = [*F0_adaptive]
-    hffb = HierarchicalFeatureFusionBlock(channels=16, num_levels=len(features_list))
-    fused_features = hffb(*features_list)
-
+    # Example of usage:
+    # Assuming `features` is a list of feature maps from the last AMTB of each stage,
+    # and `F_minus_1` is the output from the first convolution layer of the SFEB.
+    features = [F0_adaptive]
+    num_features = len(features)
+    hffb = HierarchicalFeatureFusionBlock(channels=16, num_features=num_features)
+    fused_features = hffb(features, F_minus_1)
     print("Shape of fused features:", fused_features.shape)
 
     # Visualize hierarchical feature fusion block feature maps
-    visualize_hffb_feature_maps(fused_features, title="Fused Features from HFFB")
+    # visualize_hffb_feature_maps(fused_features, title="Fused Features from HFFB")
+
+    # Initialize the Reconstruction Block
+    # Assuming the channel depth after pixel shuffle fits the final output requirement
+    reconstruction_block = ReconstructionBlock(
+        in_channels=16, out_channels=3, scale_factor=2
+    )
+
+    # Apply the Reconstruction Block
+    reconstructed_image = reconstruction_block(fused_features)
+
+    print("Shape of reconstructed image:", reconstructed_image.shape)
+
+    # Visualize the reconstructed image
+    visualize_RB_output_image(reconstructed_image)
