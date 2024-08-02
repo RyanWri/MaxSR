@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from torchvision.transforms import ToTensor, Normalize, Resize, Compose
 from PIL import Image
+import torchvision.transforms.functional as TF
 
 
 # Define a function to load and preprocess the image
@@ -39,4 +40,14 @@ def preprocess_image(image_path):
     # Apply the preprocessing steps
     image = preprocess(image)
     image = image.unsqueeze(0)  # Add batch dimension
+    return image
+
+
+# Assuming `image` is your input PIL Image
+def process_image(image_path):
+    image = Image.open(image_path)
+    # Resize and possibly crop the image to 64x64
+    image = TF.resize(image, (64, 64))
+    image = TF.to_tensor(image).unsqueeze(0)  # Add batch dimension
+
     return image

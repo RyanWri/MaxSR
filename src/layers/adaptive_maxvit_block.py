@@ -1,5 +1,5 @@
 from layers.mb_conv_with_se import MBConv
-from layers.adaptive_block_sa import AdaptiveBlockSelfAttention
+from layers.adaptive_block_self_attention import AdaptiveBlockSelfAttention
 from layers.adaptive_grid_attention import AdaptiveGridSelfAttention
 import torch.nn as nn
 

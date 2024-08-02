@@ -1,13 +1,53 @@
-in_channels: 3
-out_channels: 3
-sfeb_channels: 48
-num_blocks: 8
-blocks_per_stage: 2
-num_stages: 4
-num_heads: 4
-ffn_dim: 192
-upscale_factor: 2
-kernel_size: 3
-attention_kernel_size: 1
-batch_size: 32
-lr: 2e-4
+MaxSR-Light:
+  general:
+    stages: 4
+    mini_batch_size: 32
+    image_patch_size: 64
+    scale_factors: [2, 3, 4, 8]
+
+  network:
+    initial_width: 48 # Initial number of channels after SFEB
+    final_conv_kernel: 3
+
+  adaptive_maxvit_blocks:
+    total_blocks: 8
+    blocks_per_stage: 2
+    in_channels: 48 # Assuming same as initial_width
+    out_channels: 48
+    kernel_size: 1 # Specific for adaptive MaxViT blocks and HFFB
+
+  sfeb: # Shallow Feature Extraction Block
+    in_channels: 3 # Typically RGB input
+    out_channels: 48
+    kernel_size: 3
+
+  mbconv: # MBConv with Squeeze and Excitation
+    in_channels: 48
+    out_channels: 48
+    kernel_size: 3
+    use_squeeze_excitation: true
+
+  adaptive_block_attention:
+    in_channels: 48
+    out_channels: 48
+    num_heads: 4
+    hidden_dim: 128
+    kernel_size: 3
+    ffn_in_channels: 48
+    ffn_out_channels: 48
+
+  adaptive_grid_attention:
+    in_channels: 48
+    out_channels: 48
+    num_heads: 4
+    kernel_size: 3
+
+  hffb: # Hierarchical Feature Fusion Block
+    in_channels: 48
+    out_channels: 48
+    kernel_size: 1
+
+  rb: # Reconstruction Block
+    in_channels: 48
+    out_channels: 3 # Typically RGB output
+    output_kernel_size: 3

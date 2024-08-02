@@ -1,29 +1,32 @@
 import torch
 import torch.nn as nn
-from layers.adaptive_block_sa import AdaptiveBlockSelfAttention
-from layers.ffn import FFN
+from src.layers.adaptive_block_self_attention import AdaptiveBlockSelfAttention
+from src.layers.ffn import FFN
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger(__name__)
 
 
 class AdaptiveBlockAttention(nn.Module):
     def __init__(self, config):
         super(AdaptiveBlockAttention, self).__init__()
         # Initialize the Self-Attention component
-        self.adaptive_block_sa = AdaptiveBlockSelfAttention(config["self_attention"])
+        self.adaptive_block_sa = AdaptiveBlockSelfAttention(config)
 
         # Initialize the Feed-Forward Network component
-        self.ffn = FFN(config["ffn"])
-
-        # Optionally, add a normalization layer after FFN if required by the architecture specifics
-        self.norm = nn.LayerNorm(config["self_attention"]["in_channels"])
+        self.ffn = FFN(config)
 
     def forward(self, x):
+        logger.info("Starting... Adaptive Block Attention STAGE...")
         # Apply self-attention
         x = self.adaptive_block_sa(x)
-
+        logger.info("Completed... Adaptive Block Attention STAGE...")
         # Apply Feed-Forward Network
+        logger.info("Starting... FFN STAGE...")
         x = self.ffn(x)
-
-        # Apply normalization
-        x = self.norm(x)
+        logger.info("Completed... FFN STAGE...")
 
         return x
