@@ -5,3 +5,5 @@ pandas==2.0.3
 opencv-python==4.8.0.74
 Pillow==10.0.0
 pyyaml==6.0
+flake8==6.0.0
+black==23.3.0

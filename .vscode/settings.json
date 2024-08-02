@@ -1,6 +1,14 @@
 {
-  "python.analysis.extraPaths": ["C:\\Afeka\\MaxSR"],
-  "python.testing.pytestArgs": ["tests"],
+  "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestArgs": ["./tests"],
+  "python.autoComplete.extraPaths": ["./src"],
+  "python.analysis.extraPaths": ["./src"],
+  "python.formatting.provider": "black",
+  "python.formatting.blackPath": "C:/Afeka/MaxSR/venv/Scripts/black.exe",
+  "python.pythonPath": "C:/Afeka/MaxSR/venv/Scripts/python.exe",
+  "python.linting.enabled": true,
+  "python.linting.flake8Enabled": true,
+  "python.linting.flake8Args": ["--max-line-length=88"],
+  "python.linting.flake8Path": "C:/Afeka/MaxSR/venv/Scripts/flake8.exe"
 }
