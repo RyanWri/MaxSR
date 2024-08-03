@@ -1,5 +1,6 @@
 {
-    "python.analysis.extraPaths": [
-        "C:\\Afeka\\MaxSR\\src"
-    ]
+  "python.analysis.extraPaths": ["C:\\Afeka\\MaxSR"],
+  "python.testing.pytestArgs": ["tests"],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true
 }

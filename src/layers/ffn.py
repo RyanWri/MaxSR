@@ -7,8 +7,11 @@ class FFN(nn.Module):
     FFN is FeedForwardNetwork
     """
 
-    def __init__(self, in_channels, hidden_dim, dropout=0.1):
+    def __init__(self, config: dict):
         super(FFN, self).__init__()
+        in_channels, hidden_dim = config["ffn_in_channels"], config["ffn_out_channels"]
+        hidden_dim = config["hidden_dim"]
+        dropout = 0.1
         self.fc1 = nn.Linear(in_channels, hidden_dim)
         self.gelu = nn.GELU()
         self.fc2 = nn.Linear(hidden_dim, in_channels)
