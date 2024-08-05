@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class AdaptiveMaxViTBlock(nn.Module):
     def __init__(self, config):
         super(AdaptiveMaxViTBlock, self).__init__()
-        self.mbconv_se = MBConvSE(config["channels"], config["emb_size"])
+        self.mbconv_se = MBConvSE(config["emb_size"], config["emb_size"])
         self.block_attention = BlockAttention(
             config["dim"], config["num_heads"], config["block_size"]
         )

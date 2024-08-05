@@ -7,6 +7,7 @@ from PIL import Image
 from torchvision import transforms
 import torch
 import torch.nn as nn
+from preprossecing.img_datasets import PatchedDIV2KDataset
 
 
 # Image processing
@@ -19,6 +20,12 @@ def process_image(image_path, output_size):
 
 if __name__ == "__main__":
     config = load_config("C:\Afeka\MaxSR\src\config\maxsr_light.yaml")
+    # Specify the directory containing your DIV2K images
+    image_directory = "C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD"
+
+    # Create the dataset
+    dataset = PatchedDIV2KDataset(image_directory)
+
     image_path = "C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD/0001.png"
     processed_image = process_image(
         image_path, config["img_size"] // config["scale_factor"]
@@ -40,7 +47,11 @@ if __name__ == "__main__":
     )
     # Forward pass
     with torch.no_grad():
-        f0, f1 = sfeb(input_tensor)
+        batch_size, patches_per_img, c, h, w = patches.size()
+        patches = patches.view(
+            -1, c, h, w
+        )  # Flatten batch and patches dimensions for processing
+        f0, f1 = sfeb(patches)
         x = f0
         features = []
         for stage in stages:

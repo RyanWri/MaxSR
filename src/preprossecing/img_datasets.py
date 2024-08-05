@@ -1,31 +1,24 @@
 from torch.utils.data import Dataset
-import os
+import torchvision.transforms as transforms
 from PIL import Image
-import torchvision.transforms.functional as TF
+import os
+from utils.utils import extract_patches
 
 
-class DIV2KDataset(Dataset):
-    def __init__(self, image_dir):
-        """
-        Args:
-            image_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
+class PatchedDIV2KDataset(Dataset):
+    def __init__(self, image_dir, patch_size=64, transform=None):
         self.image_dir = image_dir
-        self.images = [
-            os.path.join(image_dir, img)
-            for img in os.listdir(image_dir)
-            if img.endswith(".png")
-        ]
+        self.images = [os.path.join(image_dir, img) for img in os.listdir(image_dir)]
+        self.patch_size = patch_size
+        self.transform = transform
 
     def __len__(self):
         return len(self.images)
 
     def __getitem__(self, idx):
-        img_name = self.images[idx]
-        image = Image.open(img_name).convert("RGB")
-
-        image = TF.resize(image, (64, 64))
-        image = TF.to_tensor(image).unsqueeze(0)  # Add batch dimension
-
-        return image
+        img_path = self.images[idx]
+        image = Image.open(img_path).convert("RGB")
+        if self.transform:
+            image = self.transform(image)
+        patches = extract_patches(image, self.patch_size, self.patch_size)
+        return patches
