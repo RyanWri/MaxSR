@@ -12,11 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 class AdaptiveMaxViTBlock(nn.Module):
-    def __init__(self, in_channels, dim, num_heads=4, block_size=8):
+    def __init__(self, config):
         super(AdaptiveMaxViTBlock, self).__init__()
-        self.mbconv_se = MBConvSE(in_channels, dim)
-        self.block_attention = BlockAttention(dim, num_heads, block_size)
-        self.grid_attention = GridAttention(dim, num_heads)
+        self.mbconv_se = MBConvSE(config["emb_size"], config["emb_size"])
+        self.block_attention = BlockAttention(
+            config["dim"], config["num_heads"], config["block_size"]
+        )
+        self.grid_attention = GridAttention(config["dim"], config["num_heads"])
 
     def forward(self, x):
         logger.info(f"AdaptiveMaxViT input shape: {x.shape}")

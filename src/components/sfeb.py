@@ -8,15 +8,15 @@ logger = logging.getLogger(__name__)
 
 
 class ShallowFeatureExtractionBlock(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    def __init__(self, config):
         super(ShallowFeatureExtractionBlock, self).__init__()
         # First 3x3 convolution
         self.conv1 = nn.Conv2d(
-            in_channels, out_channels, kernel_size=3, stride=1, padding=1
+            config["channels"], config["emb_size"], kernel_size=3, stride=1, padding=1
         )
         # Second 3x3 convolution
         self.conv2 = nn.Conv2d(
-            out_channels, out_channels, kernel_size=3, stride=1, padding=1
+            config["emb_size"], config["emb_size"], kernel_size=3, stride=1, padding=1
         )
 
     def forward(self, x):

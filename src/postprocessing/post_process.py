@@ -64,3 +64,13 @@ def visualize_RB_output_image(tensor, title="Reconstructed Image"):
     plt.title(title)
     plt.axis("off")
     plt.show()
+
+
+def imshow(tensor, title=None):
+    image = tensor.cpu().clone()  # Clone the tensor to not do changes on it
+    image = image.squeeze(0)  # Remove the fake batch dimension
+    image = transforms.ToPILImage()(image)
+    plt.imshow(image)
+    if title:
+        plt.title(title)
+    plt.pause(0.001)  # Pause a bit so that plots are updated
