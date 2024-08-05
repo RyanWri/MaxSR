@@ -1,40 +1,9 @@
 import os
 import torch
-from torch.utils.data import Dataset, DataLoader
-import torchvision.transforms.functional as TF
-from PIL import Image
+from torch.utils.data import DataLoader
 from torch import optim
 from model.maxsr import MaxSRModel
-import sys
-
-print(sys.path)  # Check if the 'src' directory is listed in the path
-
-
-class DIV2KDataset(Dataset):
-    def __init__(self, image_dir):
-        """
-        Args:
-            image_dir (string): Directory with all the images.
-            transform (callable, optional): Optional transform to be applied on a sample.
-        """
-        self.image_dir = image_dir
-        self.images = [
-            os.path.join(image_dir, img)
-            for img in os.listdir(image_dir)[:32]
-            if img.endswith(".png")
-        ]
-
-    def __len__(self):
-        return len(self.images)
-
-    def __getitem__(self, idx):
-        img_name = self.images[idx]
-        image = Image.open(img_name).convert("RGB")
-
-        image = TF.resize(image, (64, 64))
-        image = TF.to_tensor(image).unsqueeze(0)  # Add batch dimension
-
-        return image
+from preprossecing.img_datasets import DIV2KDataset
 
 
 def train(model, dataloader, optimizer, criterion, device):
@@ -81,7 +50,7 @@ if __name__ == "__main__":
     # Assuming MaxSRModel has been defined and imported
     model = MaxSRModel().to(device)
     criterion = (
-        torch.nn.MSELoss()
+        torch.nn.L1Loss()
     )  # Common choice for regression tasks like super-resolution
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 

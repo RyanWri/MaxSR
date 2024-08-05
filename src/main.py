@@ -9,7 +9,7 @@ if __name__ == "__main__":
     # Assuming MaxSRModel is already defined and imported
     model = MaxSRModel()  # Instantiate the model
     model.load_state_dict(
-        torch.load("C:\Machine Learning\models\MaxSR\model_base.pth")
+        torch.load("C:\Machine Learning\models\MaxSR\model_epoch1.pth")
     )  # Load the saved weights
     model.eval()  # Set the model to evaluation mode
 
@@ -25,5 +25,5 @@ if __name__ == "__main__":
     plt.subplot(1, 2, 1)
     visualize_RB_output_image(input_img, "Input Image")
     plt.subplot(1, 2, 2)
-    visualize_RB_output_image(output_img, "Super-Resolved Output")
+    visualize_RB_output_image(output_img, "Super-Resolution Output")
     plt.show()
