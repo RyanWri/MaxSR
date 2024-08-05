@@ -7,7 +7,8 @@ from PIL import Image
 from torchvision import transforms
 import torch
 import torch.nn as nn
-from preprossecing.img_datasets import PatchedDIV2KDataset
+from preprossecing.img_datasets import PatchedDIV2KDataset, RescaleAndPatch
+from torch.utils.data import DataLoader
 
 
 # Image processing
@@ -22,43 +23,41 @@ if __name__ == "__main__":
     config = load_config("C:\Afeka\MaxSR\src\config\maxsr_light.yaml")
     # Specify the directory containing your DIV2K images
     image_directory = "C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD"
+    transform = RescaleAndPatch(output_size=2048, downscale_factor=4, patch_size=64)
+    dataset = PatchedDIV2KDataset(image_directory, transform=transform)
+    data_loader = DataLoader(dataset, batch_size=1, shuffle=True, num_workers=4)
 
-    # Create the dataset
-    dataset = PatchedDIV2KDataset(image_directory)
+    for i, patches in enumerate(data_loader):
+        print("Batch", i, "Patch Shape:", patches.shape)
+        if i > 5:  # Check first few batches to ensure it's working correctly
+            break
 
-    image_path = "C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD/0001.png"
-    processed_image = process_image(
-        image_path, config["img_size"] // config["scale_factor"]
-    )
-    transform = transforms.Compose([transforms.ToTensor()])
-    input_tensor = transform(processed_image).unsqueeze(0)
+        sfeb = ShallowFeatureExtractionBlock(config)
+        sfeb.eval()
 
-    sfeb = ShallowFeatureExtractionBlock(config)
-    sfeb.eval()
-
-    stages = nn.ModuleList(
-        [
-            nn.Sequential(
-                AdaptiveMaxViTBlock(config),
-                AdaptiveMaxViTBlock(config),
-            )
-            for _ in range(2)  # Example: 2 stages, each with 2 blocks
-        ]
-    )
-    # Forward pass
-    with torch.no_grad():
-        batch_size, patches_per_img, c, h, w = patches.size()
-        patches = patches.view(
-            -1, c, h, w
-        )  # Flatten batch and patches dimensions for processing
-        f0, f1 = sfeb(patches)
-        x = f0
-        features = []
-        for stage in stages:
-            for block in stage:
-                x = block(x)
-            # Collect the output from the last block of each stage
-            features.append(x)
+        stages = nn.ModuleList(
+            [
+                nn.Sequential(
+                    AdaptiveMaxViTBlock(config),
+                    AdaptiveMaxViTBlock(config),
+                )
+                for _ in range(2)  # Example: 2 stages, each with 2 blocks
+            ]
+        )
+        # Forward pass
+        with torch.no_grad():
+            batch_size, patches_per_img, c, h, w = patches.size()
+            patches = patches.view(
+                -1, c, h, w
+            )  # Flatten batch and patches dimensions for processing
+            f0, f1 = sfeb(patches)
+            x = f0
+            features = []
+            for stage in stages:
+                for block in stage:
+                    x = block(x)
+                # Collect the output from the last block of each stage
+                features.append(x)
     # # Instantiate and apply the complete model
     # maxsr_model = MaxSRModel()
     # input_image = process_image("C:\Afeka\MaxSR\src\images\LR_bicubicx4.jpg")
