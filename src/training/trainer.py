@@ -41,7 +41,7 @@ if __name__ == "__main__":
     torch.multiprocessing.freeze_support()
     # Create the dataset
     train_dataset = DIV2KDataset(
-        image_dir="C:\datasets\DIV2K\Dataset\DIV2K_train_LR_bicubic_X4\X4"
+        image_dir="C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD"
     )
     train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True, num_workers=4)
 
