@@ -1,7 +1,7 @@
 import torch.nn as nn
-from components.block_attention import BlockAttention
-from components.grid_attention import GridAttention
-from components.mb_conv_with_se import MBConvSE
+from components.adaptive_maxvit_block.block_attention import BlockAttention
+from components.adaptive_maxvit_block.grid_attention import GridAttention
+from components.adaptive_maxvit_block.mb_conv_with_se import MBConvSE
 import logging
 
 

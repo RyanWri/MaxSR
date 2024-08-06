@@ -1,6 +1,6 @@
 import torch.nn as nn
 from components.sfeb import ShallowFeatureExtractionBlock
-from components.adaptive_maxvit_block import AdaptiveMaxViTBlock
+from components.adaptive_maxvit_block.adaptive_maxvit_block import AdaptiveMaxViTBlock
 from components.hffb import HierarchicalFeatureFusionBlock
 from components.reconstruction_block import ReconstructionBlock
 
