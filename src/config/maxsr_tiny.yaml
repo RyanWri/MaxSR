@@ -1,0 +1,11 @@
+model_config:
+  patch_size: 64
+  output_size: 256
+  channels: 3
+  emb_size: 128
+  num_heads: 8
+  depth: 6
+  scale_factor: 4 # This represents the upscaling factor for spatial dimensions
+  block_size: 8 # Example block size for attention mechanisms
+  dim: 128 # Dimension for transformer embeddings, matching SFEB output
+  num_features: 2
