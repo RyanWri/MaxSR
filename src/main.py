@@ -6,6 +6,7 @@ from components.adaptive_maxvit_block.block_attention import BlockAttention
 from components.adaptive_maxvit_block.grid_attention import GridAttention
 from components.adaptive_maxvit_block.adaptive_maxvit_block import AdaptiveMaxViTBlock
 from components.hffb import HierarchicalFeatureFusionBlock
+from components.reconstruction_block import ReconstructionBlock
 from utils.utils import load_config
 
 
@@ -34,6 +35,8 @@ def test_inside_maxvit_block(F0, config):
 if __name__ == "__main__":
     # Example usage
     input_patch = torch.randn(1, 3, 64, 64)  # Batch size, Channels, Height, Width
+    input_hr_patch = torch.randn(1, 3, 256, 256)
+
     # Load configuration
     config = load_config("C:\Afeka\MaxSR\src\config\maxsr_tiny.yaml")["model_config"]
 
@@ -65,4 +68,16 @@ if __name__ == "__main__":
     print("stages complete")
     hffb = HierarchicalFeatureFusionBlock(config["emb_size"], config["num_features"])
     x = hffb(features, F_minus_1)
-    print("HFBF Output Shape:", x.shape)
+    print("HFFB Output Shape:", x.shape)
+
+    rb = ReconstructionBlock(
+        config["emb_size"], config["channels"], config["scale_factor"]
+    )
+    x = rb(x)
+    print("Reconstruction Block Output Shape:", x.shape)
+
+    mae_loss = nn.L1Loss()
+    mae = mae_loss(
+        x, input_hr_patch
+    ).item()  # Calculate MAE and convert to a Python float
+    print("MAE:", mae)
