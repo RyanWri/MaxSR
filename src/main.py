@@ -48,7 +48,6 @@ if __name__ == "__main__":
     output = model(input_patch)
     print("output of MaxSR ", output.shape)
 
-
     sfeb = ShallowFeatureExtractionBlock(config)
     print("Input Shape:", input_patch.shape)
     F_minus_1, F0 = sfeb(input_patch)
