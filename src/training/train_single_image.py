@@ -1,4 +1,4 @@
-from utils.utils import load_config
+from utils.utils import load_config, save_torch_model
 from patches_extractor.patches_extractor import PairedPatchesDataset
 from model.maxsr import MaxSRModel
 import os
@@ -7,12 +7,14 @@ from torch.utils.data import DataLoader, TensorDataset
 import torch.nn as nn
 import numpy as np
 import logging
+import torch.optim as optim
 
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
+
 
 if __name__ == "__main__":
     # Load configuration
@@ -28,7 +30,12 @@ if __name__ == "__main__":
 
     # Assume the model is already defined and loaded
     model = MaxSRModel(config)
-    model.eval()  # Set the model to evaluation mode if not training
+    model.train()  # Set the model to training mode
+
+    # Assuming 'model' is your neural network model
+    optimizer = optim.Adam(
+        model.parameters(), lr=2e-4
+    )  # Set learning rate to 2 * 10^-4
 
     # Move model to appropriate device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -43,7 +50,7 @@ if __name__ == "__main__":
 
     # Process each batch
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
-        if batch_index >= 3:
+        if batch_index >= 2:
             break
 
         logger.info("low resoultion patches shape", lr_patches.shape)
@@ -65,17 +72,17 @@ if __name__ == "__main__":
             )  # Ensure the patch is on the correct device
             hr_single_patch = hr_single_patch.to(device)
 
-            with torch.no_grad():  # Assuming you're in evaluation mode
-                output = model(single_patch)  # Process each patch through your model
-                print(f"Output shape for patch {patch_index+1}: {output.shape}")
+            optimizer.zero_grad()  # Clear existing gradients
+            output = model(single_patch)  # Process each patch through your model
+            print(f"Output shape for patch {patch_index+1}: {output.shape}")
 
-                # If you have a corresponding HR patch for calculating loss, you can do it here
-                loss = criterion(
-                    output, hr_single_patch
-                )  # Assuming `criterion` is defined
-                print(f"Loss for patch {patch_index+1}: {loss.item()}")
+            # If you have a corresponding HR patch for calculating loss, you can do it here
+            loss = criterion(output, hr_single_patch)
+            print(f"Loss for patch {patch_index+1}: {loss.item()}")
+            loss.backward()
+            optimizer.step()
 
-                losses.append(loss.item())
+            losses.append(loss.item())
 
         batch_loss = np.sum(np.array(losses)) / len(losses)
         final_losses.append(batch_loss)
@@ -85,3 +92,5 @@ if __name__ == "__main__":
 
     maxsr_final_mae_loss = np.sum(np.array(final_losses)) / len(final_losses)
     print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
+
+    save_torch_model(model, version="version-0-0-2")
