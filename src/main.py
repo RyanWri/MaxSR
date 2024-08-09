@@ -8,6 +8,7 @@ from components.adaptive_maxvit_block.adaptive_maxvit_block import AdaptiveMaxVi
 from components.hffb import HierarchicalFeatureFusionBlock
 from components.reconstruction_block import ReconstructionBlock
 from utils.utils import load_config
+import os
 
 
 def test_inside_maxvit_block(F0, config):
@@ -38,7 +39,9 @@ if __name__ == "__main__":
     input_hr_patch = torch.randn(1, 3, 256, 256)
 
     # Load configuration
-    config = load_config("C:\Afeka\MaxSR\src\config\maxsr_tiny.yaml")["model_config"]
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
+        "model_config"
+    ]
 
     sfeb = ShallowFeatureExtractionBlock(config)
     print("Input Shape:", input_patch.shape)
