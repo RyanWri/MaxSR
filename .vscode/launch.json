@@ -11,6 +11,17 @@
                 "PYTHONPATH": "${workspaceFolder}/src"
             },
             "cwd": "${workspaceFolder}/src"
-        }
+        },
+        {
+            "name": "Python: Current File",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/src"
+            },
+            "cwd": "${workspaceFolder}/src"
+          }
     ]
 }
