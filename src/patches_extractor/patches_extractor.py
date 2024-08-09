@@ -8,9 +8,7 @@ from utils.plotting import show_patches
 
 
 class PairedPatchesDataset(Dataset):
-    def __init__(
-        self, hr_dir, lr_dir, hr_patch_size=256, lr_patch_size=64
-    ):
+    def __init__(self, hr_dir, lr_dir, hr_patch_size=256, lr_patch_size=64):
         self.hr_dir = hr_dir
         self.lr_dir = lr_dir
         self.hr_patch_size = hr_patch_size

@@ -45,36 +45,43 @@ if __name__ == "__main__":
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
         if batch_index >= 3:
             break
-        
+
         logger.info("low resoultion patches shape", lr_patches.shape)
 
         # Assuming `lr_patch` is your tensor with shape (1, 64, 3, 64, 64)
-        num_of_patches = lr_patches.shape[1] 
+        num_of_patches = lr_patches.shape[1]
         # Access the second dimension, which has 64 elements
         # Loop through each patch
         for patch_index in range(num_of_patches):
-            single_patch = lr_patches[0, patch_index].unsqueeze(0)  # (3, 64, 64) -> (1, 3, 64, 64)
-            hr_single_patch = hr_patches[0,patch_index].unsqueeze(0) # (3,256,256) -> (1, 3, 256, 256)
+            single_patch = lr_patches[0, patch_index].unsqueeze(
+                0
+            )  # (3, 64, 64) -> (1, 3, 64, 64)
+            hr_single_patch = hr_patches[0, patch_index].unsqueeze(
+                0
+            )  # (3,256,256) -> (1, 3, 256, 256)
             # Now `single_patch` is ready to be input to your model
-            single_patch = single_patch.to(device)  # Ensure the patch is on the correct device
+            single_patch = single_patch.to(
+                device
+            )  # Ensure the patch is on the correct device
             hr_single_patch = hr_single_patch.to(device)
-            
 
             with torch.no_grad():  # Assuming you're in evaluation mode
                 output = model(single_patch)  # Process each patch through your model
-                print(f'Output shape for patch {patch_index+1}: {output.shape}')
+                print(f"Output shape for patch {patch_index+1}: {output.shape}")
 
                 # If you have a corresponding HR patch for calculating loss, you can do it here
-                loss = criterion(output, hr_single_patch)  # Assuming `criterion` is defined
-                print(f'Loss for patch {patch_index+1}: {loss.item()}')
+                loss = criterion(
+                    output, hr_single_patch
+                )  # Assuming `criterion` is defined
+                print(f"Loss for patch {patch_index+1}: {loss.item()}")
 
                 losses.append(loss.item())
 
         batch_loss = np.sum(np.array(losses)) / len(losses)
         final_losses.append(batch_loss)
-        # clear image losses for next image 
+        # clear image losses for next image
         losses.clear()
-        print(f'Loss for batch index {batch_index+1}: {batch_loss}')
+        print(f"Loss for batch index {batch_index+1}: {batch_loss}")
 
     maxsr_final_mae_loss = np.sum(np.array(final_losses)) / len(final_losses)
-    print(f' MaxSR MAE L1Loss is, {maxsr_final_mae_loss}')
+    print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
