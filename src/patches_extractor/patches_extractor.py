@@ -8,14 +8,11 @@ from utils.plotting import show_patches
 
 
 class PairedPatchesDataset(Dataset):
-    def __init__(
-        self, hr_dir, lr_dir, hr_patch_size=256, lr_patch_size=64, transform=None
-    ):
+    def __init__(self, hr_dir, lr_dir, hr_patch_size=256, lr_patch_size=64):
         self.hr_dir = hr_dir
         self.lr_dir = lr_dir
         self.hr_patch_size = hr_patch_size
         self.lr_patch_size = lr_patch_size
-        self.transform = transform
         self.images = [
             img for img in os.listdir(lr_dir) if img.endswith(".png")
         ]  # Assume filenames match in both dirs
@@ -30,15 +27,11 @@ class PairedPatchesDataset(Dataset):
         hr_image = Image.open(hr_image_path).convert("RGB")
         lr_image = Image.open(lr_image_path).convert("RGB")
 
-        if self.transform is not None:
-            hr_image = self.transform(hr_image)
-            lr_image = self.transform(lr_image)
-
         # Extract patches
-        hr_patches = self.extract_patches(hr_image, self.hr_patch_size)
         lr_patches = self.extract_patches(lr_image, self.lr_patch_size)
+        hr_patches = self.extract_patches(hr_image, self.hr_patch_size)
 
-        return hr_patches, lr_patches
+        return lr_patches, hr_patches
 
     def extract_patches(self, img, patch_size):
         img = transforms.ToTensor()(img)  # Convert to tensor

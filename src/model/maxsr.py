@@ -6,27 +6,28 @@ from components.reconstruction_block import ReconstructionBlock
 
 
 class MaxSRModel(nn.Module):
-    def __init__(self):
+    def __init__(self, config):
         super(MaxSRModel, self).__init__()
-        self.sfeb = ShallowFeatureExtractionBlock(in_channels=3, out_channels=16)
-        self.stages = nn.ModuleList(
-            [
-                nn.Sequential(
-                    AdaptiveMaxViTBlock(in_channels=16, dim=16),
-                    AdaptiveMaxViTBlock(in_channels=16, dim=16),
-                )
-                for _ in range(2)  # Example: 2 stages, each with 2 blocks
-            ]
+        self.sfeb = ShallowFeatureExtractionBlock(config)
+        blocks = tuple(
+            AdaptiveMaxViTBlock(config) for _ in range(config["block_per_stage"])
         )
-        self.hffb = HierarchicalFeatureFusionBlock(channels=16, num_features=2)
+        self.stages = nn.ModuleList(
+            [nn.Sequential(*blocks) for _ in range(config["stages"])]
+        )
+        self.hffb = HierarchicalFeatureFusionBlock(
+            channels=config["emb_size"], num_features=config["num_features"]
+        )
         # Adjust scale_factor as needed
         self.reconstruction_block = ReconstructionBlock(
-            in_channels=16, out_channels=3, scale_factor=1
+            in_channels=config["emb_size"],
+            out_channels=config["channels"],
+            scale_factor=config["scale_factor"],
         )
 
     def forward(self, x):
         # Process the image through SFEB
-        F0, F_minus_1 = self.sfeb(x)
+        F_minus_1, F0 = self.sfeb(x)
         # Input for first stage AdaptiveMaxViTBlock is F0
         x = F0
         features = []

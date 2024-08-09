@@ -27,15 +27,15 @@ def downscale_images(source_folder, target_folder, scale_factor=4):
 
 def transform_padded_HR_images_to_LR_images(src_folder: str, scale_factor: int) -> None:
     """
-        relative to our server dataset folder -> /home/linuxu/Documents/datasets
-        src_folder -> name of folder with HR images
-        scale_factor -> int represent how much to reduce original image
+    relative to our server dataset folder -> /home/linuxu/Documents/datasets
+    src_folder -> name of folder with HR images
+    scale_factor -> int represent how much to reduce original image
 
-        example usage:
-            transform_padded_HR_images_to_LR_images(src_folder="div2k_validation_pad", scale_factor=4)
+    example usage:
+        transform_padded_HR_images_to_LR_images(src_folder="div2k_validation_pad", scale_factor=4)
 
-        output: None
-            save all bicubic images in LR to target_dir
+    output: None
+        save all bicubic images in LR to target_dir
     """
     # our server root dataset folder
     base_dataset_path = "/home/linuxu/Documents/datasets"
