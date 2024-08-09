@@ -4,6 +4,7 @@ from patches_extractor.patches_extractor import PairedPatchesDataset
 from torch.utils.data import DataLoader
 from components.sfeb import ShallowFeatureExtractionBlock
 from components.adaptive_maxvit_block.adaptive_maxvit_block import AdaptiveMaxViTBlock
+from components.adaptive_maxvit_block.mbconv_with_se import MBConvSE
 import torch.nn as nn
 
 if __name__ == "__main__":
@@ -25,6 +26,15 @@ if __name__ == "__main__":
     sfeb = ShallowFeatureExtractionBlock(config)
     F_minus_1, F0 = sfeb(first_lr_patch)
 
+    print(F_minus_1.shape)
+    print(F0.shape)
+
+    x = F0
+
+    mbconv_se = MBConvSE(config["emb_size"], config["patch_size"])
+
+    x = mbconv_se(x)
+
     stages = nn.ModuleList(
         [
             nn.Sequential(
@@ -34,11 +44,6 @@ if __name__ == "__main__":
             for _ in range(2)  # Example: 2 stages, each with 2 blocks
         ]
     )
-
-    print(F_minus_1.shape)
-    print(F0.shape)
-
-    x = F0
     features = []
     for stage in stages:
         for block in stage:

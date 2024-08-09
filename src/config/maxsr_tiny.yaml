@@ -8,3 +8,4 @@ model_config:
   scale_factor: 4 # This represents the upscaling factor for spatial dimensions
   block_size: 8 # Example block size for attention mechanisms
   dim: 128 # Dimension for transformer embeddings, matching SFEB output
+  num_features: 2
