@@ -7,6 +7,7 @@ from components.adaptive_maxvit_block.grid_attention import GridAttention
 from components.adaptive_maxvit_block.adaptive_maxvit_block import AdaptiveMaxViTBlock
 from components.hffb import HierarchicalFeatureFusionBlock
 from components.reconstruction_block import ReconstructionBlock
+from model.maxsr import MaxSRModel
 from utils.utils import load_config
 import os
 
@@ -42,6 +43,11 @@ if __name__ == "__main__":
     config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
         "model_config"
     ]
+
+    model = MaxSRModel(config)
+    output = model(input_patch)
+    print("output of MaxSR ", output.shape)
+
 
     sfeb = ShallowFeatureExtractionBlock(config)
     print("Input Shape:", input_patch.shape)

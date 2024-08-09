@@ -9,3 +9,5 @@ model_config:
   block_size: 8 # Example block size for attention mechanisms
   dim: 128 # Dimension for transformer embeddings, matching SFEB output
   num_features: 2
+  stages: 2
+  block_per_stage: 2
