@@ -6,7 +6,7 @@ from postprocessing.post_process import visualize_feature_maps
 
 config = {}
 sfeb = ShallowFeatureExtractionBlock(config)
-x = torch.rand(1,3,64,64)
+x = torch.rand(1, 3, 64, 64)
 F_minus_1, F0 = sfeb(x)
 visualize_feature_maps(F0)
 
