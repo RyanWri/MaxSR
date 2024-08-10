@@ -5,10 +5,7 @@ from components.adaptive_maxvit_block.mb_conv_with_se import MBConvSE
 import logging
 
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("my_application")
 
 
 class AdaptiveMaxViTBlock(nn.Module):

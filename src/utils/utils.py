@@ -3,6 +3,7 @@ import yaml
 import torch
 import datetime
 import os
+import logging.config
 
 
 # Choose the nearest power of two greater than the most common height
@@ -17,13 +18,14 @@ def load_config(config_path):
     return config
 
 
-def save_torch_model(model, run_id: str) -> None:
-    version = "version-0-0-1"
+def save_torch_model(model, run_id: str, batch_number: int = 0) -> None:
     base_dir = "/home/linuxu/Documents/models/MaxSR"
     # Create the run_id folder if it doesn't exist
     os.makedirs(f"{base_dir}/{run_id}", exist_ok=True)
-    # save model in our experiment run id
+    # save model in our experiment run id with batch number
+    version = f"version-0-0-{batch_number}"
     model_path = f"{base_dir}/{run_id}/{version}.pth"
+    # save model
     torch.save(model.state_dict(), model_path)
 
 
@@ -38,3 +40,9 @@ def calculate_np_mae_loss(losses: list) -> float:
         return np.sum(np.array(losses)) / len(losses)
     except ValueError as err:
         print(f"error trying to calculate MAE on an empty array")
+
+
+def setup_logging(logging_config_path: str) -> None:
+    with open(logging_config_path, "r") as file:
+        config = yaml.safe_load(file)
+        logging.config.dictConfig(config)

@@ -1,6 +1,9 @@
 from typing import Tuple
 from utils.utils import calculate_np_mae_loss
 import time
+import logging
+
+logger = logging.getLogger("batches")
 
 
 def process_single_image_patch(x_patch, y_patch, model, optimizer, criterion, device):
@@ -79,4 +82,6 @@ def process_batch(
 
     batch_loss = calculate_np_mae_loss(losses)
     batch_time = time.time() - start_time
+
+    logger.info(f"batch processed Images in time: {batch_time} seconds")
     return batch_loss, batch_time

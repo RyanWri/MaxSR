@@ -9,6 +9,7 @@ from utils.utils import (
     generate_run_id,
     load_config,
     save_torch_model,
+    setup_logging,
 )
 from patches_extractor.patches_extractor import PairedPatchesDataset
 from training.processor import process_batch
@@ -50,9 +51,6 @@ def run_experiment(data_loader, batch_size, model, optimizer, criterion, device)
 
     # Process each batch
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
-        if batch_index >= 1:
-            break
-
         # Process Batch
         batch_loss, batch_time = process_batch(
             lr_patches=lr_patches,
@@ -62,24 +60,25 @@ def run_experiment(data_loader, batch_size, model, optimizer, criterion, device)
             criterion=criterion,
             device=device,
         )
-
-        print(
-            f"batch {batch_index} processed {batch_size} Image in time: {batch_time} seconds"
-        )
         final_losses.append(batch_loss)
+
+        # save model after each batch
+        save_torch_model(model, run_id=run_id, batch_number=batch_index)
 
     maxsr_final_mae_loss = calculate_np_mae_loss(final_losses)
     print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
 
-    save_torch_model(model, run_id=run_id)
     end = time.time() - start
     print(f"total time for MaxSR training: {end}")
 
 
 if __name__ == "__main__":
+    # Call this at the start of your application to turn on/off logs
+    setup_logging(os.path.join(os.getcwd(), "config", "logging_conf.yaml"))
+
     hr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad"
     lr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4"
-    batch_size = 8
+    batch_size = 16
     data_loader = create_dataloader_for_training(
         hr_dir=hr_dir,
         lr_dir=lr_dir,
