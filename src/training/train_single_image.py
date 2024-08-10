@@ -1,4 +1,9 @@
-from utils.utils import load_config, save_torch_model
+from utils.utils import (
+    load_config,
+    save_torch_model,
+    calculate_np_mae_loss,
+    generate_run_id,
+)
 from patches_extractor.patches_extractor import PairedPatchesDataset
 from model.maxsr import MaxSRModel
 import os
@@ -17,7 +22,29 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def run_single_image_patch(x_patch, y_patch, model, optimizer, criterion):
+    # Ensure the patch is on the correct device
+    single_patch = x_patch.to(device)
+    hr_single_patch = y_patch.to(device)
+
+    # Clear existing gradients
+    optimizer.zero_grad()
+    # Process each patch through your model
+    output = model(single_patch)
+
+    # calculating loss corresponding to HR patch
+    loss = criterion(output, hr_single_patch)
+    loss.backward()
+    optimizer.step()
+
+    return loss.item()
+
+
 if __name__ == "__main__":
+    # generate unique run id for experimentation
+    run_id = generate_run_id()
+    print(f"Starting training for Run ID: {run_id}")
+
     # Load configuration
     config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
         "model_config"
@@ -34,9 +61,8 @@ if __name__ == "__main__":
     model.train()  # Set the model to training mode
 
     # Assuming 'model' is your neural network model
-    optimizer = optim.Adam(
-        model.parameters(), lr=2e-4
-    )  # Set learning rate to 2 * 10^-4
+    # Set learning rate to 2 * 10^-4
+    optimizer = optim.Adam(model.parameters(), lr=2e-4)
 
     # Move model to appropriate device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -53,7 +79,7 @@ if __name__ == "__main__":
 
     # Process each batch
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
-        if batch_index >= 32:
+        if batch_index >= 3:
             break
 
         logger.info("low resoultion patches shape", lr_patches.shape)
@@ -64,39 +90,26 @@ if __name__ == "__main__":
         # Access the second dimension, which has 64 elements
         # Loop through each patch
         for patch_index in range(num_of_patches):
-            single_patch = lr_patches[0, patch_index].unsqueeze(
-                0
-            )  # (3, 64, 64) -> (1, 3, 64, 64)
-            hr_single_patch = hr_patches[0, patch_index].unsqueeze(
-                0
-            )  # (3,256,256) -> (1, 3, 256, 256)
-            # Now `single_patch` is ready to be input to your model
-            single_patch = single_patch.to(
-                device
-            )  # Ensure the patch is on the correct device
-            hr_single_patch = hr_single_patch.to(device)
+            x_patch = lr_patches[0, patch_index].unsqueeze(0)
+            y_patch = hr_patches[0, patch_index].unsqueeze(0)
 
-            optimizer.zero_grad()  # Clear existing gradients
-            output = model(single_patch)  # Process each patch through your model
-            print(f"Output shape for patch {patch_index+1}: {output.shape}")
+            loss = run_single_image_patch(
+                x_patch=x_patch,
+                y_patch=y_patch,
+                model=model,
+                optimizer=optimizer,
+                criterion=criterion,
+            )
+            losses.append(loss)
 
-            # If you have a corresponding HR patch for calculating loss, you can do it here
-            loss = criterion(output, hr_single_patch)
-            print(f"Loss for patch {patch_index+1}: {loss.item()}")
-            loss.backward()
-            optimizer.step()
-
-            losses.append(loss.item())
-
-        batch_loss = np.sum(np.array(losses)) / len(losses)
-        final_losses.append(batch_loss)
+        final_losses.append(calculate_np_mae_loss(losses))
         # clear image losses for next image
         losses.clear()
-        print(f"Loss for batch index {batch_index+1}: {batch_loss}")
+        print(f"Loss for batch index {batch_index+1}: {final_losses[batch_index]}")
         batch_time = time.time() - start_time
         logger.info(f"batch index {batch_index+1} time took: {batch_time}")
 
-    maxsr_final_mae_loss = np.sum(np.array(final_losses)) / len(final_losses)
+    maxsr_final_mae_loss = calculate_np_mae_loss(final_losses)
     print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
 
-    save_torch_model(model, version="version-0-0-3")
+    save_torch_model(model, run_id=run_id)
