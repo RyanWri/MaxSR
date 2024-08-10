@@ -11,10 +11,12 @@ from utils.utils import (
     save_torch_model,
 )
 from patches_extractor.patches_extractor import PairedPatchesDataset
-from training.processor import process_batch
-
+from training.processor import process_batch, process_single_image
+import time
 
 if __name__ == "__main__":
+    start = time.time()
+
     # generate unique run id for experimentation
     run_id = generate_run_id()
     print(f"Starting training for Run ID: {run_id}")
@@ -28,7 +30,10 @@ if __name__ == "__main__":
     hr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad"
     lr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4"
     dataset = PairedPatchesDataset(hr_dir, lr_dir, hr_patch_size=256, lr_patch_size=64)
-    data_loader = DataLoader(dataset, batch_size=1)
+
+    # Define Batch size
+    batch_size = 32
+    data_loader = DataLoader(dataset, batch_size=batch_size)
 
     # Assume the model is already defined and loaded
     model = MaxSRModel(config)
@@ -50,6 +55,7 @@ if __name__ == "__main__":
 
     # Process each batch
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
+        # Process Batch
         batch_loss, batch_time = process_batch(
             lr_patches=lr_patches,
             hr_patches=hr_patches,
@@ -58,10 +64,15 @@ if __name__ == "__main__":
             criterion=criterion,
             device=device,
         )
-        print(f"batch {batch_index} time: {batch_time}")
+
+        print(
+            f"batch {batch_index} processed {batch_size} Image in time: {batch_time} seconds"
+        )
         final_losses.append(batch_loss)
 
     maxsr_final_mae_loss = calculate_np_mae_loss(final_losses)
     print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
 
     save_torch_model(model, run_id=run_id)
+    end = time.time() - start
+    print(f"total time for MaxSR training: {end}")
