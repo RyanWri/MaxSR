@@ -8,6 +8,7 @@ import torch.nn as nn
 import numpy as np
 import logging
 import torch.optim as optim
+import time
 
 
 logging.basicConfig(
@@ -48,13 +49,16 @@ if __name__ == "__main__":
     losses = []
     final_losses = []
 
+    logger.info("---------- START TRAINING---------")
+
     # Process each batch
     for batch_index, (lr_patches, hr_patches) in enumerate(data_loader):
-        if batch_index >= 2:
+        if batch_index >= 32:
             break
 
         logger.info("low resoultion patches shape", lr_patches.shape)
 
+        start_time = time.time()
         # Assuming `lr_patch` is your tensor with shape (1, 64, 3, 64, 64)
         num_of_patches = lr_patches.shape[1]
         # Access the second dimension, which has 64 elements
@@ -89,8 +93,10 @@ if __name__ == "__main__":
         # clear image losses for next image
         losses.clear()
         print(f"Loss for batch index {batch_index+1}: {batch_loss}")
+        batch_time = time.time() - start_time
+        logger.info(f"batch index {batch_index+1} time took: {batch_time}")
 
     maxsr_final_mae_loss = np.sum(np.array(final_losses)) / len(final_losses)
     print(f" MaxSR MAE L1Loss is, {maxsr_final_mae_loss}")
 
-    save_torch_model(model, version="version-0-0-2")
+    save_torch_model(model, version="version-0-0-3")
