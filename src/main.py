@@ -2,7 +2,7 @@ import os
 import torch
 import torch.nn as nn
 from model.maxsr import MaxSRModel
-from utils.utils import load_config, save_torch_model, generate_run_id
+from utils.utils import load_config, save_torch_model, generate_run_id, setup_logging
 from patches_extractor.patches_extractor import PairedPatchesDataset
 from model.maxsr import MaxSRModel
 import os
@@ -16,9 +16,10 @@ import time
 
 if __name__ == "__main__":
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
-        "model_config"
-    ]
+    config = load_config()["model_config"]
+
+    # Call this at the start of your application to turn on/off logs
+    setup_logging(os.path.join(os.getcwd(), "config", "logging_conf.yaml"))
 
     # Define our MaxSR model using config provided
     model = MaxSRModel(config)

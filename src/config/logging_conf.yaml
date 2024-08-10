@@ -1,0 +1,28 @@
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  simple:
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: DEBUG
+    formatter: simple
+    stream: ext://sys.stdout
+
+loggers:
+  my_application:
+    # set level to INFO if you want to see logs
+    level: CRITICAL
+    handlers: [console]
+    propagate: no
+  batches:
+    level: INFO
+    handlers: [console]
+    propagate: no
+
+root:
+  level: CRITICAL
+  handlers: [console]
