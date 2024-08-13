@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 import os
-from utils.utils import load_config
+from utils.utils import load_config, setup_logging
 from utils.plotting import plot_image
 from model.maxsr import MaxSRModel
 from inference.processor import inference_image_to_patches, reassemble_patches
@@ -9,6 +9,9 @@ from torchvision.transforms.functional import to_pil_image
 
 
 if __name__ == "__main__":
+    # Call this at the start of your application to turn on/off logs
+    setup_logging(os.path.join(os.getcwd(), "config", "logging_conf.yaml"))
+
     # Load configuration
     config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
         "model_config"
@@ -22,8 +25,9 @@ if __name__ == "__main__":
     model.eval()
     model.to(torch.device("cuda" if torch.cuda.is_available() else "cpu"))
 
+    image_name = "0028.png"
     test_image = (
-        "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/0012.png"
+        f"/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/{image_name}"
     )
     input_patches = inference_image_to_patches(image_path=test_image)
     output_patches = []
@@ -36,10 +40,10 @@ if __name__ == "__main__":
             output_patches.append(output.squeeze())
 
     # Assuming 'patches' is your list of 64 tensors, each of shape (3, 256, 256)
-    patches_tensor = torch.stack(output_patches, dim=0)
+    patches_tensor = torch.stack(output_patches)
 
     # Now 'patches_tensor' should have the shape (64, 3, 256, 256)
     print("Shape of the combined tensor:", patches_tensor.shape)
     # Assuming `output_patches` is a tensor with shape [64, 3, 256, 256] where 64 patches are lined up
-    output_image = reassemble_patches(patches_tensor, num_patches_per_row=8)
-    plot_image(output_image)
+    output_image = reassemble_patches(patches_tensor, patches_per_row=8)
+    plot_image(output_image, filename=image_name)

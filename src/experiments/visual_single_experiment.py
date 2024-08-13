@@ -16,7 +16,9 @@ visualize_feature_maps(F0)
 # features = []
 # for stage in self.stages:
 #     for block in stage:
-#         x = block(x)
+#         x = MBconv_with_se(x)
+#         x = block_attention(x)
+#         x = grid_attention(x)
 #     # Collect the output from the last block of each stage
 #     features.append(x)
 # x = self.hffb(features, F_minus_1)
