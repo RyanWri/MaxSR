@@ -15,7 +15,7 @@ handlers:
 loggers:
   my_application:
     # set level to INFO if you want to see logs
-    level: CRITICAL
+    level: INFO
     handlers: [console]
     propagate: no
   batches:
