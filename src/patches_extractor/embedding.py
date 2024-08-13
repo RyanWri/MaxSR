@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import os
 from components.adaptive_maxvit_block.block_attention import BlockAttention
-from components.adaptive_maxvit_block.mbconv_with_se import MBConvWithSE
+from components.amtb.mbconv_with_se import MBConvWithSE
 from utils.utils import setup_logging, load_config
 from components.sfeb import ShallowFeatureExtractionBlock
 import logging
