@@ -3,11 +3,14 @@ from PIL import Image
 import torch
 import torch.nn as nn
 import os
+from components.adaptive_maxvit_block.block_attention import BlockAttention
+from components.adaptive_maxvit_block.mbconv_with_se import MBConvWithSE
 from utils.utils import setup_logging, load_config
 from components.sfeb import ShallowFeatureExtractionBlock
 import logging
 
 logger = logging.getLogger("my_application")
+
 
 # Load an image and convert it to a tensor
 def load_image(image_path):
@@ -60,7 +63,9 @@ if __name__ == "__main__":
     setup_logging(os.path.join(os.getcwd(), "config", "logging_conf.yaml"))
 
     # Assuming an image path is specified
-    image_path = "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/0015.png"
+    image_path = (
+        "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/0015.png"
+    )
     image_tensor = load_image(image_path)
 
     # Initialize the PatchEmbedding module
@@ -78,8 +83,29 @@ if __name__ == "__main__":
     print("Shape of embedded patches:", embedded_patches.shape)
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))["model_config"]
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
+        "model_config"
+    ]
     sfeb = ShallowFeatureExtractionBlock(config)
     sfeb = sfeb.to(device)
-    f_minus1, f0 = sfeb(embedded_patches)
-    print("Shape of f0 patches:", f0.shape)
+    F_minus1, F0 = sfeb(embedded_patches)
+    print("Shape of f_minus_1 patches:", F_minus1.shape)
+    print("Shape of f0 patches:", F0.shape)
+
+    # Adaptive maxvit block
+    mbconv_se = MBConvWithSE(
+        in_channels=config["emb_size"], out_channels=config["emb_size"]
+    )
+    mbconv_se = mbconv_se.to(device)
+    # Forward pass through MBConv with SE
+    output = mbconv_se(F0, F0)
+    print("MBOCNV with SE output shape:", output.shape)
+
+    # ----------- Adaptive block attention ---------
+    block_att = BlockAttention(
+        dim=config["dim"],
+        num_heads=config["num_heads"],
+        block_size=config["block_size"],
+    )
+    block_att = block_att.to(device)
+    bo = block_att(output)
