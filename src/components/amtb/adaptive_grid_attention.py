@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class GridSelfAttention(nn.Module):
     def __init__(self, in_features, heads=8):
         super(GridSelfAttention, self).__init__()
@@ -21,12 +22,15 @@ class GridSelfAttention(nn.Module):
         keys = self.key(x)
         values = self.value(x)
 
-        attention_scores = torch.matmul(queries, keys.transpose(-2, -1)) / (self.in_features ** 0.5)
+        attention_scores = torch.matmul(queries, keys.transpose(-2, -1)) / (
+            self.in_features**0.5
+        )
         attention = self.softmax(attention_scores)
 
         out = torch.matmul(attention, values)
         out = out.view(batch_size, num_patches, -1)
         return out
+
 
 class FeedForwardNetwork(nn.Module):
     def __init__(self, in_features, hidden_features):
@@ -40,6 +44,7 @@ class FeedForwardNetwork(nn.Module):
         x = self.fc2(x)
         return x
 
+
 class AdaptiveGridAttention(nn.Module):
     def __init__(self, in_features, hidden_features, heads=8):
         super(AdaptiveGridAttention, self).__init__()
@@ -49,7 +54,9 @@ class AdaptiveGridAttention(nn.Module):
     def forward(self, x):
         # Grid self-attention part
         grid_attention_output = self.grid_self_attention(x)
-        x = grid_attention_output + x  # Add the input to the output of grid self-attention
+        x = (
+            grid_attention_output + x
+        )  # Add the input to the output of grid self-attention
 
         # Feed-forward network part
         ffn_output = self.ffn(x)
@@ -57,12 +64,15 @@ class AdaptiveGridAttention(nn.Module):
 
         return x
 
+
 # Example usage
 in_features = 128  # Number of features per patch
 hidden_features = 512  # Hidden layer size in FFN
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 adaptive_grid_attention = AdaptiveGridAttention(in_features, hidden_features)
-adaptive_grid_attention = adaptive_grid_attention.to(device)  # Ensure it's on the correct device
+adaptive_grid_attention = adaptive_grid_attention.to(
+    device
+)  # Ensure it's on the correct device
 
 # Assuming 'output' from the previous block
 output = torch.randn(128, 64, 128).to(device)  # Simulating input
