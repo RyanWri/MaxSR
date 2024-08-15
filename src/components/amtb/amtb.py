@@ -32,19 +32,3 @@ class AdaptiveMaxViTBlock(nn.Module):
         x = self.adaptive_grid_attention(x)
 
         return x
-
-
-# Example usage
-in_features = 128  # Number of features per patch
-hidden_features = 512  # Hidden layer size in FFN for attention blocks
-out_features = 128  # Output features after MBConvWithSE
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-adaptive_maxvit_block = AdaptiveMaxViTBlock(in_features, hidden_features, out_features)
-adaptive_maxvit_block = adaptive_maxvit_block.to(
-    device
-)  # Ensure it's on the correct device
-
-# Assuming 'output' from the previous component
-output = torch.randn(128, 64, 128).to(device)  # Simulating input
-final_output = adaptive_maxvit_block(output)
-print("Final Adaptive MaxViT Block output shape:", final_output.shape)

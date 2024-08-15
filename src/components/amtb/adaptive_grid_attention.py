@@ -63,18 +63,3 @@ class AdaptiveGridAttention(nn.Module):
         x = ffn_output + x  # Add the input to the output of FFN
 
         return x
-
-
-# Example usage
-in_features = 128  # Number of features per patch
-hidden_features = 512  # Hidden layer size in FFN
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-adaptive_grid_attention = AdaptiveGridAttention(in_features, hidden_features)
-adaptive_grid_attention = adaptive_grid_attention.to(
-    device
-)  # Ensure it's on the correct device
-
-# Assuming 'output' from the previous block
-output = torch.randn(128, 64, 128).to(device)  # Simulating input
-final_grid_output = adaptive_grid_attention(output)
-print("Final grid attention output shape:", final_grid_output.shape)

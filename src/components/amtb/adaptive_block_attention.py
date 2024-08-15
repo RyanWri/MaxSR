@@ -60,19 +60,3 @@ class AdaptiveBlockAttention(nn.Module):
         x = ffn_output + x  # Add the input to the output of FFN
 
         return x
-
-
-# Example usage
-in_features = 128  # Number of features per patch
-hidden_features = 512  # Hidden layer size in FFN
-adaptive_block_attention = AdaptiveBlockAttention(in_features, hidden_features)
-# Move to the appropriate device
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-adaptive_block_attention = adaptive_block_attention.to(
-    device
-)  # Ensure it's on the correct device
-
-# Assuming 'output' from the previous block
-output = torch.randn(128, 64, 128).to(device)  # Simulating input
-final_output = adaptive_block_attention(output)
-print("Final output shape:", final_output.shape)

@@ -20,9 +20,10 @@ class MaxSRModel(nn.Module):
         )
         # Adjust scale_factor as needed
         self.reconstruction_block = ReconstructionBlock(
-            in_channels=config["emb_size"],
-            out_channels=config["channels"],
-            scale_factor=config["scale_factor"],
+            embed_dim=config["dim"],
+            num_patches=config["num_patches"],
+            final_image_size=config["final_image_size"],
+            patch_target_size=config["patch_target_size"],
         )
 
     def forward(self, x):

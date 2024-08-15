@@ -3,10 +3,8 @@ from PIL import Image
 import torch
 import torch.nn as nn
 import os
-from components.adaptive_maxvit_block.block_attention import BlockAttention
-from components.amtb.mbconv_with_se import MBConvWithSE
+from model.max_sr_model import MaxSRModel
 from utils.utils import setup_logging, load_config
-from components.sfeb import ShallowFeatureExtractionBlock
 import logging
 
 logger = logging.getLogger("my_application")
@@ -86,26 +84,7 @@ if __name__ == "__main__":
     config = load_config(os.path.join(os.getcwd(), "config", "maxsr_light.yaml"))[
         "model_config"
     ]
-    sfeb = ShallowFeatureExtractionBlock(config)
-    sfeb = sfeb.to(device)
-    F_minus1, F0 = sfeb(embedded_patches)
-    print("Shape of f_minus_1 patches:", F_minus1.shape)
-    print("Shape of f0 patches:", F0.shape)
-
-    # Adaptive maxvit block
-    mbconv_se = MBConvWithSE(
-        in_channels=config["emb_size"], out_channels=config["emb_size"]
-    )
-    mbconv_se = mbconv_se.to(device)
-    # Forward pass through MBConv with SE
-    output = mbconv_se(F0, F0)
-    print("MBOCNV with SE output shape:", output.shape)
-
-    # ----------- Adaptive block attention ---------
-    block_att = BlockAttention(
-        dim=config["dim"],
-        num_heads=config["num_heads"],
-        block_size=config["block_size"],
-    )
-    block_att = block_att.to(device)
-    bo = block_att(output)
+    max_sr_model = MaxSRModel(config)
+    model = max_sr_model.to(device)
+    output = model(embedded_patches)
+    print("Shape of MaxSR Model output is:", output.shape)

@@ -2,9 +2,9 @@ import torch
 import torch.nn as nn
 
 
-class HFFB(nn.Module):
+class HierarchicalFeatureFusionBlock(nn.Module):
     def __init__(self, num_stages, in_features, out_features):
-        super(HFFB, self).__init__()
+        super(HierarchicalFeatureFusionBlock, self).__init__()
         # 1x1 Convolution to fuse features from different stages
         self.conv1x1 = nn.Conv2d(in_features * num_stages, out_features, kernel_size=1)
 
@@ -43,20 +43,3 @@ class HFFB(nn.Module):
         )  # Reshape back to [batch_size, num_patches, features]
 
         return x
-
-
-# Example usage
-num_stages = 2  # Number of stages
-in_features = 128  # Number of features per stage
-out_features = 128  # Output features after fusion
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-hffb = HFFB(num_stages, in_features, out_features)
-hffb = hffb.to(device)  # Ensure it's on the correct device
-
-# Example inputs from stages (each stage's output tensor shape is [128, 64, 128])
-features = [torch.randn(128, 64, 128).to(device) for _ in range(num_stages)]
-F_minus_1 = torch.randn(128, 64, 128).to(device)  # Simulating F-1 from SFEB
-
-# Pass the collected features through the HFFB
-fused_output = hffb(features, F_minus_1)
-print("Fused features shape:", fused_output.shape)
