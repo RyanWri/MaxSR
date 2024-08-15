@@ -10,13 +10,21 @@ class MaxSRModel(nn.Module):
         super(MaxSRModel, self).__init__()
         self.sfeb = ShallowFeatureExtractionBlock(config)
         blocks = tuple(
-            AdaptiveMaxViTBlock(config) for _ in range(config["block_per_stage"])
+            AdaptiveMaxViTBlock(
+                in_features=config["emb_size"],
+                hidden_features=config["hidden_features"],
+                out_features=config["dim"],
+                heads=config["num_heads"],
+            )
+            for _ in range(config["block_per_stage"])
         )
         self.stages = nn.ModuleList(
             [nn.Sequential(*blocks) for _ in range(config["stages"])]
         )
         self.hffb = HierarchicalFeatureFusionBlock(
-            channels=config["emb_size"], num_features=config["num_features"]
+            num_stages=config["num_features"],
+            in_features=config["emb_size"],
+            out_features=config["emb_size"],
         )
         # Adjust scale_factor as needed
         self.reconstruction_block = ReconstructionBlock(

@@ -6,7 +6,7 @@ from components.amtb.adaptive_grid_attention import AdaptiveGridAttention
 
 
 class AdaptiveMaxViTBlock(nn.Module):
-    def __init__(self, in_features, hidden_features, out_features, heads=8):
+    def __init__(self, in_features, hidden_features, out_features, heads):
         super(AdaptiveMaxViTBlock, self).__init__()
         # Initialize the three components
         self.mb_conv_se = MBConvWithSE(

@@ -6,6 +6,7 @@ import os
 from model.max_sr_model import MaxSRModel
 from utils.utils import setup_logging, load_config
 import logging
+import torch.cuda.amp as amp
 
 logger = logging.getLogger("my_application")
 
@@ -81,10 +82,11 @@ if __name__ == "__main__":
     print("Shape of embedded patches:", embedded_patches.shape)
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_light.yaml"))[
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
         "model_config"
     ]
     max_sr_model = MaxSRModel(config)
     model = max_sr_model.to(device)
-    output = model(embedded_patches)
+    with amp.autocast():
+        output = model(embedded_patches)
     print("Shape of MaxSR Model output is:", output.shape)
