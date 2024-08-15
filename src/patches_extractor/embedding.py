@@ -69,7 +69,7 @@ if __name__ == "__main__":
     image_tensor = load_image(image_path)
 
     # Initialize the PatchEmbedding module
-    patch_embedding = PatchEmbedding(patch_size=64, emb_size=128, num_patches=64)
+    patch_embedding = PatchEmbedding(patch_size=64, emb_size=768, num_patches=64)
 
     # Move to the appropriate device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     print("Shape of embedded patches:", embedded_patches.shape)
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_light.yaml"))[
         "model_config"
     ]
     sfeb = ShallowFeatureExtractionBlock(config)
