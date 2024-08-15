@@ -40,19 +40,3 @@ class PairedPatchesDataset(Dataset):
         )
         patches = patches.contiguous().view(-1, 3, patch_size, patch_size)
         return patches
-
-
-if __name__ == "__main__":
-    # Example usage
-    hr_dir = "C:\datasets\DIV2K\Dataset\DIV2K_train_HR_PAD"
-    lr_dir = "C:\datasets\DIV2K\Dataset\DIV2K_train_LR_PAD_BICUBIC_x4"
-    dataset = PairedPatchesDataset(hr_dir, lr_dir)
-    data_loader = DataLoader(dataset, batch_size=1, shuffle=True)
-
-    # Test loading some data
-    for hr_patches, lr_patches in data_loader:
-        print("HR Patch Shape:", hr_patches.shape)  # Expect: [num_patches, 3, 256, 256]
-        print("LR Patch Shape:", lr_patches.shape)  # Expect: [num_patches, 3, 64, 64]
-        # Example of using the function with data from your DataLoader
-        show_patches(hr_patches, lr_patches, patch_index=32)
-        break

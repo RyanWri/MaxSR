@@ -5,6 +5,7 @@ import torch.nn as nn
 import os
 from model.max_sr_model import MaxSRModel
 from utils.utils import setup_logging, load_config
+from utils.plotting import tensor_to_image
 import logging
 import torch.cuda.amp as amp
 
@@ -89,4 +90,8 @@ if __name__ == "__main__":
     model = max_sr_model.to(device)
     with amp.autocast():
         output = model(embedded_patches)
+
     print("Shape of MaxSR Model output is:", output.shape)
+    final_image = output.detach().cpu()
+    filepath = "/home/linuxu/Documents/model-output-images/reconstructed_0015.png"
+    tensor_to_image(final_image, filepath)
