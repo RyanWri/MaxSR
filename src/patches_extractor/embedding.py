@@ -87,9 +87,15 @@ if __name__ == "__main__":
         "model_config"
     ]
     max_sr_model = MaxSRModel(config)
-    model = max_sr_model.to(device)
+    model_version = "20240815_170500/2.pth"
+    model_path = f"/home/linuxu/Documents/models/MaxSR/{model_version}"
+    max_sr_model.load_state_dict(torch.load(model_path))
+
+    max_sr_model.to(device)
+    max_sr_model.eval()
+
     with amp.autocast():
-        output = model(embedded_patches)
+        output = max_sr_model(embedded_patches)
 
     print("Shape of MaxSR Model output is:", output.shape)
     final_image = output.detach().cpu()

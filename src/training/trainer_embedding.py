@@ -13,6 +13,7 @@ from utils.utils import (
 from patches_extractor.embedding import PatchEmbedding
 import time
 from preprossecing.lr_hr_dataset import LRHRDataset
+from training.cuda_cleaner import clean_cuda_memory_by_threshold
 
 
 if __name__ == "__main__":
@@ -60,12 +61,14 @@ if __name__ == "__main__":
 
     # Initialize the GradScaler for mixed precision training
     scaler = GradScaler()
-    epochs = 1
+    epochs = 2
 
     for epoch in range(1, epochs + 1):
         # lr_image is low resolution, hr_image is high resolution
         for index, (lr_image, hr_image) in enumerate(data_loader):
             print(f"processing image {index+1} in epoch {epoch}")
+            image_start_time = time.time()
+
             lr_image = lr_image.to(device)
             hr_image = hr_image.to(device)
             optimizer.zero_grad()
@@ -81,9 +84,15 @@ if __name__ == "__main__":
             scaler.step(optimizer)  # Unscales gradients and updates parameters
             scaler.update()  # Updates the scaler for next iteration
 
-            if index % 32 == 0:
-                save_torch_model(model, run_id=run_id, epoch=epoch, batch=index)
+            batch_time = time.time() - image_start_time
+            print(f"image {index + 1}/800 took {batch_time:.2f} seconds")
 
+            if clean_cuda_memory_by_threshold(memory_threshold_gb=6.0):
+                print("Clearing GPU cache")
+                torch.cuda.empty_cache()
+
+        # save model after each epoch
+        save_torch_model(model, run_id=run_id, epoch=epoch)
         print(f"Epoch [{epoch}/10], Loss: {loss.item():.4f}")
 
     print("Training complete.")

@@ -18,12 +18,12 @@ def load_config(config_path):
     return config
 
 
-def save_torch_model(model, run_id: str, epoch: int, batch: int) -> None:
+def save_torch_model(model, run_id: str, epoch: int) -> None:
     base_dir = "/home/linuxu/Documents/models/MaxSR"
     # Create the run_id folder if it doesn't exist
-    os.makedirs(f"{base_dir}/{run_id}/{epoch}", exist_ok=True)
-    # save model in our experiment run id/epoch/ with batch number as filename
-    model_path = f"{base_dir}/{run_id}/{epoch}/{batch}.pth"
+    os.makedirs(f"{base_dir}/{run_id}", exist_ok=True)
+    # save model in our experiment run id with epoch number as filename
+    model_path = f"{base_dir}/{run_id}/epoch_{epoch}.pth"
     # save model
     torch.save(model.state_dict(), model_path)
 
