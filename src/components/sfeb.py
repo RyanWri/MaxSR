@@ -9,7 +9,7 @@ class ShallowFeatureExtractionBlock(nn.Module):
         super(ShallowFeatureExtractionBlock, self).__init__()
         # First 3x3 convolution
         self.conv1 = nn.Conv2d(
-            config["channels"], config["emb_size"], kernel_size=3, stride=1, padding=1
+            1, config["emb_size"], kernel_size=3, stride=1, padding=1
         )
         # Second 3x3 convolution
         self.conv2 = nn.Conv2d(

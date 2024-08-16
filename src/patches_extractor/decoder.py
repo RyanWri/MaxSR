@@ -3,7 +3,7 @@ import torch.nn as nn
 import matplotlib.pyplot as plt
 
 
-class ReconstructionBlock(nn.Module):
+class PatchDecoder(nn.Module):
     """Decodes embedded patches into a large image using pixel shuffle, optimized for GPU usage."""
 
     def __init__(
@@ -32,7 +32,6 @@ class ReconstructionBlock(nn.Module):
         self.pixel_shuffle = nn.PixelShuffle(scale_factor)
 
     def forward(self, x):
-        x = x[0].unsqueeze(0)
         # x shape: (batch_size, num_patches, embed_dim)
         batch_size = x.shape[0]
 
@@ -56,3 +55,38 @@ class ReconstructionBlock(nn.Module):
         x = x.view(batch_size, 3, 2048, 2048)  # merge into final image size
 
         return x
+
+
+# Device configuration
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f"Using device: {device}")
+
+# Example usage
+if __name__ == "__main__":
+    # Assume output from transformer
+    transformer_output = torch.randn(1, 64, 768).to(
+        device
+    )  # (batch_size, num_patches, embed_dim)
+    decoder = PatchDecoder().to(device)  # Move model to GPU
+    reconstructed_image = decoder(transformer_output)
+    print(f"Reconstructed Image Size: {reconstructed_image.shape}")
+
+    # Detach the tensor and move to CPU
+    image = reconstructed_image.detach().cpu()
+
+    # Convert to numpy array
+    image_np = image.squeeze().permute(1, 2, 0).numpy()
+
+    # Normalize the image to [0, 1] for displaying purposes
+    image_np = (image_np - image_np.min()) / (image_np.max() - image_np.min())
+
+    # Plot using Matplotlib
+    plt.figure(figsize=(10, 10))
+    plt.imshow(image_np)
+    plt.axis("off")  # Turn off axis numbers and ticks
+    plt.title("Reconstructed Image")
+
+    # Save the figure to a file
+    filepath = "/home/linuxu/Documents/model-output-images/reconstructed_image.png"
+    plt.savefig(filepath, bbox_inches="tight", pad_inches=0, dpi=300)  # Save as PNG
+    plt.close()  # Close the plot to free up memory
