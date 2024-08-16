@@ -20,6 +20,22 @@ def load_image(image_path):
     return image_tensor
 
 
+# precomputed embeddings for a single image with 64 patches to a representating vector
+def embed_image(image_absolute_path, model, device, transform):
+    # open image
+    lr_image = Image.open(image_absolute_path).convert("RGB")
+    # transform to tensor
+    lr_image = transform(lr_image)
+    lr_image = lr_image.to(device).unsqueeze(
+        0
+    )  # Move to device and add batch dimension
+    # Compute the embedding using the model and return to cpu
+    with torch.no_grad():  # Disable gradient calculation for inference
+        embedded_tensor = model(lr_image).detach().cpu()
+    # Remove the batch dimension and return the tensor
+    return embedded_tensor.squeeze(0)
+
+
 class PatchEmbedding(nn.Module):
     def __init__(self, patch_size, emb_size, num_patches):
         super(PatchEmbedding, self).__init__()

@@ -2,6 +2,8 @@ import os
 from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import ToTensor
+import torch
+from patches_extractor.embedding import embed_image
 
 
 class LRHRDataset(Dataset):
@@ -41,3 +43,40 @@ class LRHRDataset(Dataset):
             hr_image = self.transform(hr_image)
 
         return lr_image, hr_image
+
+
+# Step 1: Define a custom dataset for precomputed embeddings and HR images
+class PrecomputedEmbeddingDataset(Dataset):
+    def __init__(self, lr_dir, hr_dir, model):
+        # define transformer
+        self.transform = ToTensor()
+        # define device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        # Store HR imags from HR dir, transform to tensors
+        hr_images = []
+        for hr_image in os.listdir(hr_dir):
+            hr_images.append(os.path.join(hr_dir, hr_image))
+        self.hr_images = hr_images
+
+        # Convert LR images to tensors and precompute embeddings
+        self.embeddings = []
+        for lr_image in os.listdir(lr_dir):
+            lr_image_path = os.path.join(lr_dir, lr_image)
+            embeded_image = embed_image(lr_image_path, model, device, self.transform)
+            self.embeddings.append(embeded_image)
+
+        # Ensure that both folders have the same number of files and match each other
+        assert len(self.embeddings) == len(
+            self.hr_images
+        ), "Mismatch in LR and HR dataset sizes"
+
+    def __len__(self):
+        return len(self.embeddings)
+
+    def __getitem__(self, idx):
+        precomputed_embedding = self.embeddings[idx]
+        hr_image = Image.open(self.hr_images[idx]).convert("RGB")
+        hr_image = self.transform(hr_image)
+        # Return a pair of precomputed embedding and HR image
+        return precomputed_embedding, hr_image
