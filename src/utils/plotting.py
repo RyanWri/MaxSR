@@ -1,4 +1,6 @@
+import torch
 import matplotlib.pyplot as plt
+from PIL import Image
 
 
 def show_patches(hr_patches, lr_patches, patch_index):
@@ -23,26 +25,35 @@ def show_patches(hr_patches, lr_patches, patch_index):
     plt.show(block=True)
 
 
-def plot_image(tensor, filename):
+def save_tensor_as_image(tensor, file_path):
     """
-    Plot a tensor as an image.
+    Takes a tensor with shape (1, 3, 2048, 2048), converts it to an RGB image,
+    plots the image, and saves it to a specified file path.
+    MaxSR model output is (1,3,2048,2048), do not forget to detach it from GPU
 
     Args:
-    tensor (Tensor): Image tensor to plot, shape (channels, height, width).
+    tensor (torch.Tensor): Input tensor with shape (1, 3, 2048, 2048).
+    file_path (str): Path where the image will be saved.
     """
-    if tensor.is_cuda:
-        tensor = tensor.cpu()  # Move tensor to CPU if it's on GPU
+    # Check if the input tensor has the correct shape
+    if tensor.shape != (1, 3, 2048, 2048):
+        raise ValueError("Input tensor must have shape (1, 3, 2048, 2048)")
 
-    # Normalize the tensor to [0, 1] for displaying purposes if it's not already
-    tensor = tensor.float()  # Ensure tensor is float for accurate division
-    tensor = (tensor - tensor.min()) / (tensor.max() - tensor.min())
+    # Squeeze the tensor to remove the batch dimension
+    image_tensor = tensor.squeeze(0)  # This changes the shape to (3, 2048, 2048)
 
-    # Change from CxHxW to HxWxC for plotting with matplotlib
-    tensor = tensor.permute(1, 2, 0)  # Convert to HxWxC
+    # Convert the tensor to a PIL Image
+    # Transpose the tensor to have (H, W, C) format from (C, H, W)
+    image_tensor = image_tensor.permute(1, 2, 0)
+    # Scale the tensor from 0-1 (if necessary) and convert to uint8
+    image_tensor = image_tensor * 255  # Assuming the tensor is scaled between 0 and 1
+    image_tensor = image_tensor.detach().cpu().byte().numpy()
+    image = Image.fromarray(image_tensor)
 
-    # Ensure no channel is above 1 (can happen due to numerical precision issues)
-    # tensor.clamp_(0, 1)
-
-    plt.imshow(tensor.numpy())  # Convert to numpy array and plot
+    # Plotting the image using matplotlib
+    plt.imshow(image)
     plt.axis("off")  # Turn off axis numbers and ticks
-    plt.savefig(f"/home/linuxu/Documents/{filename}")
+    plt.title("MaxSR Reconstructed Image")
+
+    # Save the image
+    image.save(file_path)

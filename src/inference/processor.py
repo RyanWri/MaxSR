@@ -4,9 +4,7 @@ import torch
 
 
 def load_and_transform_image(image_path, output_size=(512, 512)):
-    transform = transforms.Compose(
-        [transforms.ToTensor()]
-    )
+    transform = transforms.Compose([transforms.ToTensor()])
     image = Image.open(image_path).convert("RGB")
     image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
     return image_tensor
@@ -50,9 +48,13 @@ def inference_image_to_patches(image_path):
 #     full_image = torch.cat(rows, dim=1)
 #     return full_image
 
+
 def reassemble_patches(patches, patches_per_row=8):
     # Each row is formed by concatenating 8 patches side by side
-    rows = [torch.cat(tuple(patches[i:i+patches_per_row]), dim=2) for i in range(0, len(patches), patches_per_row)]
+    rows = [
+        torch.cat(tuple(patches[i : i + patches_per_row]), dim=2)
+        for i in range(0, len(patches), patches_per_row)
+    ]
     # Concatenate all the rows vertically
     full_image = torch.cat(tuple(rows), dim=1)
     return full_image
