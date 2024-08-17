@@ -25,7 +25,7 @@ def show_patches(hr_patches, lr_patches, patch_index):
     plt.show(block=True)
 
 
-def tensor_to_image(tensor, file_path):
+def save_tensor_as_image(tensor, file_path):
     """
     Takes a tensor with shape (1, 3, 2048, 2048), converts it to an RGB image,
     plots the image, and saves it to a specified file path.
@@ -46,14 +46,14 @@ def tensor_to_image(tensor, file_path):
     # Transpose the tensor to have (H, W, C) format from (C, H, W)
     image_tensor = image_tensor.permute(1, 2, 0)
     # Scale the tensor from 0-1 (if necessary) and convert to uint8
-    image_tensor = (
-        (image_tensor * 255).byte().numpy()
-    )  # Assuming the tensor is scaled between 0 and 1
+    image_tensor = image_tensor * 255  # Assuming the tensor is scaled between 0 and 1
+    image_tensor = image_tensor.detach().cpu().byte().numpy()
     image = Image.fromarray(image_tensor)
 
     # Plotting the image using matplotlib
     plt.imshow(image)
     plt.axis("off")  # Turn off axis numbers and ticks
+    plt.title("MaxSR Reconstructed Image")
 
     # Save the image
     image.save(file_path)

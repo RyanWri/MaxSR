@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 from skimage.transform import resize
-from IPython.display import display, HTML
 
 
 def downscale_image(image, scale):

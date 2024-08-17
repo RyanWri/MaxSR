@@ -45,3 +45,26 @@ def setup_logging(logging_config_path: str) -> None:
     with open(logging_config_path, "r") as file:
         config = yaml.safe_load(file)
         logging.config.dictConfig(config)
+
+
+def save_checkpoint(state, run_id, epoch, keep_last):
+    """
+    store model state dict as checkpoint, no more than {keep_last} models in folder for memory
+    """
+    base_dir = "/home/linuxu/Documents/models/MaxSR/"
+    checkpoint_dir = f"{base_dir}/{run_id}/model-checkpoints"
+    if not os.path.exists(checkpoint_dir):
+        os.makedirs(checkpoint_dir)
+
+    # Save the current model state with epoch number
+    torch.save(state, f"{checkpoint_dir}/model-epoch-{epoch}.pth")
+
+    # Get all model files sorted by modification time
+    checkpoints = sorted(
+        os.listdir(checkpoint_dir),
+        key=lambda x: os.path.getmtime(os.path.join(checkpoint_dir, x)),
+    )
+
+    # Keep only the last `keep_last` models
+    while len(checkpoints) > keep_last:
+        os.remove(os.path.join(checkpoint_dir, checkpoints.pop(0)))

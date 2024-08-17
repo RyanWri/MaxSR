@@ -1,0 +1,16 @@
+train:
+  epochs: 100
+  batch_size: 1 # run image by image each epoch due to memory limitations
+  metrics_dir: metrics 
+  checkpoint_dir: model-checkpoins
+  best_models: 3 # how many versions of the model to save
+  low_resolution_dir: /home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4
+  high_resolution_dir: /home/linuxu/Documents/datasets/div2k_train_pad
+  early_stopping:
+    patience: 3
+    min_delta: 0.01
+
+inference:
+  model_path: /home/linuxu/Documents/models/MaxSR/20240817_144442/model-checkpoints/model-epoch-11.pth
+  test_image: /home/linuxu/Documents/test-images/random1.jpg
+  output_image_path: /home/linuxu/Documents/model-output-images/reconstructed-ramdom1.png
