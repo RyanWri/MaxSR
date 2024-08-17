@@ -54,15 +54,19 @@ class PrecomputedEmbeddingDataset(Dataset):
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
         # Store HR imags from HR dir, transform to tensors
-        hr_images = []
-        for hr_image in os.listdir(hr_dir):
-            hr_images.append(os.path.join(hr_dir, hr_image))
-        self.hr_images = hr_images
-
-        # Convert LR images to tensors and precompute embeddings
+        # Convert LR images to tensors and store precompute embeddings
+        self.hr_images = []
         self.embeddings = []
-        for lr_image in os.listdir(lr_dir):
-            lr_image_path = os.path.join(lr_dir, lr_image)
+
+        # currently training on 300 images
+        for image_name in os.listdir(hr_dir)[:300]:
+            # HR images as tensors
+            hr_image = Image.open(os.path.join(hr_dir, image_name)).convert("RGB")
+            hr_image = self.transform(hr_image)
+            self.hr_images.append(hr_image)
+
+            # Embeddings
+            lr_image_path = os.path.join(lr_dir, image_name)
             embeded_image = embed_image(lr_image_path, model, device, self.transform)
             self.embeddings.append(embeded_image)
 
@@ -75,8 +79,5 @@ class PrecomputedEmbeddingDataset(Dataset):
         return len(self.embeddings)
 
     def __getitem__(self, idx):
-        precomputed_embedding = self.embeddings[idx]
-        hr_image = Image.open(self.hr_images[idx]).convert("RGB")
-        hr_image = self.transform(hr_image)
         # Return a pair of precomputed embedding and HR image
-        return precomputed_embedding, hr_image
+        return self.embeddings[idx], self.hr_images[idx]

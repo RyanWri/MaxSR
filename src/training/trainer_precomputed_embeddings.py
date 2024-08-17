@@ -8,12 +8,19 @@ from utils.utils import (
     calculate_np_mae_loss,
     generate_run_id,
     load_config,
+    save_checkpoint,
     save_torch_model,
 )
 from patches_extractor.embedding import PatchEmbedding
 import time
 from preprossecing.lr_hr_dataset import PrecomputedEmbeddingDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
+from model_evaluation.metrics import (
+    EarlyStopping,
+    calculate_psnr,
+    calculate_ssim,
+    log_metrics_to_json,
+)
 
 
 if __name__ == "__main__":
@@ -57,18 +64,20 @@ if __name__ == "__main__":
     run_id = generate_run_id()
     print(f"Starting training for Run ID: {run_id}")
 
-    model.train()
-
     # Initialize the GradScaler for mixed precision training
     scaler = GradScaler()
-    epochs = 10
+    epochs = 100
+
+    # Initialize EarlyStopping
+    early_stopping = EarlyStopping(patience=3, min_delta=0.01)
 
     for epoch in range(1, epochs + 1):
-        # lr_image is low resolution, hr_image is high resolution
+        model.train()
+        print(f"processing epoch {epoch} / {epochs}")
+        epoch_start_time = time.time()
+        running_loss, psnr_score, ssim_score = 0.0, 0.0, 0.0
+        # lr_image_embedded is low resolution image after patch + embedding, hr_image is high resolution
         for index, (lr_image_embedded, hr_image) in enumerate(data_loader):
-            print(f"processing image {index+1} in epoch {epoch}")
-            image_start_time = time.time()
-
             lr_image_embedded = lr_image_embedded.to(device)
             hr_image = hr_image.to(device)
             optimizer.zero_grad()
@@ -84,16 +93,43 @@ if __name__ == "__main__":
             scaler.scale(loss).backward()  # Scales the loss and backpropagates
             scaler.step(optimizer)  # Unscales gradients and updates parameters
             scaler.update()  # Updates the scaler for next iteration
-
-            batch_time = time.time() - image_start_time
-            print(f"image {index + 1}/800 took {batch_time:.2f} seconds")
-
-            if clean_cuda_memory_by_threshold(memory_threshold_gb=6.0):
+            if clean_cuda_memory_by_threshold(memory_threshold_gb=6.6):
                 print("Clearing GPU cache")
                 torch.cuda.empty_cache()
 
-        # save model after each epoch
-        save_torch_model(model, run_id=run_id, epoch=epoch)
-        print(f"Epoch [{epoch}/10], Loss: {loss.item():.4f}")
+            running_loss += loss.item()
+
+            # Calculate PSNR and SSIM for the batch
+            psnr_score += calculate_psnr(output, hr_image)
+            ssim_score += calculate_ssim(output, hr_image)
+
+        # collect metrics for epoch
+        epoch_loss = running_loss / len(data_loader)
+        epoch_psnr = psnr_score / len(data_loader)
+        epoch_ssim = ssim_score / len(data_loader)
+        epoch_time = time.time() - epoch_start_time
+
+        # Log metrics for this iteration
+        log_metrics_to_json(
+            run_id=run_id,
+            epoch=epoch,
+            loss=epoch_loss,
+            psnr=epoch_psnr,
+            ssim=epoch_ssim,
+            total_time=epoch_time,
+        )
+
+        # Check for early stopping
+        early_stopping(epoch_loss, epoch_psnr, epoch_ssim)
+
+        if early_stopping.early_stop:
+            print("Early stopping triggered. Stopping training.")
+            break
+
+        # save the model checkpoint if there is an improvment
+        if early_stopping.counter == 0:
+            print(f"Saving model checkpoint at epoch {epoch}")
+            save_checkpoint(model.state_dict(), run_id=run_id, epoch=epoch, keep_last=3)
+            print(f"Model saved at epoch {epoch}")
 
     print("Training complete.")
