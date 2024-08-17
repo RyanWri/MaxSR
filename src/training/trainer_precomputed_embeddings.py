@@ -28,14 +28,14 @@ if __name__ == "__main__":
     start = time.time()
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_super_tiny.yaml"))[
         "model_config"
     ]
 
-    # High resoultion folder (3,2048,2048)
-    # Low resolution folder (3,512,512)
-    hr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad"
-    lr_dir = "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4"
+    # High resoultion folder (3,128,128)
+    # Low resolution folder (3,64,64)
+    hr_dir = "/home/linuxu/Documents/datasets/Tiny_HR"
+    lr_dir = "/home/linuxu/Documents/datasets/Tiny_LR"
 
     # Initialize the PatchEmbedding module
     patch_embedding_model = PatchEmbedding(

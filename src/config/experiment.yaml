@@ -1,13 +1,14 @@
 train:
   epochs: 100
   batch_size: 1 # run image by image each epoch due to memory limitations
+  root_dir: /home/linuxu/Documents/models/MaxSR-Tiny
   metrics_dir: metrics 
   checkpoint_dir: model-checkpoins
   best_models: 3 # how many versions of the model to save
   low_resolution_dir: /home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4
   high_resolution_dir: /home/linuxu/Documents/datasets/div2k_train_pad
   early_stopping:
-    patience: 3
+    patience: 6
     min_delta: 0.01
 
 inference:

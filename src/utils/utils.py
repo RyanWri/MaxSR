@@ -51,7 +51,7 @@ def save_checkpoint(state, run_id, epoch, keep_last):
     """
     store model state dict as checkpoint, no more than {keep_last} models in folder for memory
     """
-    base_dir = "/home/linuxu/Documents/models/MaxSR/"
+    base_dir = "/home/linuxu/Documents/models/MaxSR-Tiny/"
     checkpoint_dir = f"{base_dir}/{run_id}/model-checkpoints"
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)

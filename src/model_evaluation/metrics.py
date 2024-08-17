@@ -58,7 +58,7 @@ def log_metrics_to_json(run_id, epoch, loss, psnr, ssim, total_time):
     }
 
     a = []
-    base_dir = "/home/linuxu/Documents/models/MaxSR"
+    base_dir = "/home/linuxu/Documents/models/MaxSR-Tiny"
     metrics_dir = f"{base_dir}/{run_id}/metrics"
 
     if not os.path.exists(metrics_dir):
