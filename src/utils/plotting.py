@@ -35,10 +35,6 @@ def save_tensor_as_image(tensor, file_path):
     tensor (torch.Tensor): Input tensor with shape (1, 3, 2048, 2048).
     file_path (str): Path where the image will be saved.
     """
-    # Check if the input tensor has the correct shape
-    if tensor.shape != (1, 3, 2048, 2048):
-        raise ValueError("Input tensor must have shape (1, 3, 2048, 2048)")
-
     # Squeeze the tensor to remove the batch dimension
     image_tensor = tensor.squeeze(0)  # This changes the shape to (3, 2048, 2048)
 
@@ -47,6 +43,7 @@ def save_tensor_as_image(tensor, file_path):
     image_tensor = image_tensor.permute(1, 2, 0)
     # Scale the tensor from 0-1 (if necessary) and convert to uint8
     image_tensor = image_tensor * 255  # Assuming the tensor is scaled between 0 and 1
+    image_tensor = torch.clamp(image_tensor, 0, 255)
     image_tensor = image_tensor.detach().cpu().byte().numpy()
     image = Image.fromarray(image_tensor)
 

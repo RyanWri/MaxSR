@@ -18,6 +18,7 @@ from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
     calculate_psnr,
+    calculate_psnr_ssim_metrics,
     calculate_ssim,
     log_metrics_to_json,
 )
@@ -66,10 +67,10 @@ if __name__ == "__main__":
 
     # Initialize the GradScaler for mixed precision training
     scaler = GradScaler()
-    epochs = 100
+    epochs = 100000
 
     # Initialize EarlyStopping
-    early_stopping = EarlyStopping(patience=3, min_delta=0.01)
+    early_stopping = EarlyStopping(patience=20, min_delta=0.01)
 
     for epoch in range(1, epochs + 1):
         model.train()
@@ -98,10 +99,10 @@ if __name__ == "__main__":
                 torch.cuda.empty_cache()
 
             running_loss += loss.item()
-
+            psnr, ssim = calculate_psnr_ssim_metrics(output, hr_image, device)
             # Calculate PSNR and SSIM for the batch
-            psnr_score += calculate_psnr(output, hr_image)
-            ssim_score += calculate_ssim(output, hr_image)
+            psnr_score += psnr
+            ssim_score += ssim
 
         # collect metrics for epoch
         epoch_loss = running_loss / len(data_loader)
@@ -129,7 +130,7 @@ if __name__ == "__main__":
         # save the model checkpoint if there is an improvment
         if early_stopping.counter == 0:
             print(f"Saving model checkpoint at epoch {epoch}")
-            save_checkpoint(model.state_dict(), run_id=run_id, epoch=epoch, keep_last=3)
+            save_checkpoint(model.state_dict(), run_id=run_id, epoch=epoch, keep_last=5)
             print(f"Model saved at epoch {epoch}")
 
     print("Training complete.")
