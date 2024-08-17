@@ -54,17 +54,16 @@ def do_inference(image_path, device):
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Setup models
-model_path = "/home/linuxu/Documents/models/MaxSR/20240817_005535/model-checkpoints/model-epoch-100.pth"
+model_path = "/home/linuxu/Documents/models/MaxSR/20240817_144442/model-checkpoints/model-epoch-11.pth"
 maxsr_model, patch_embedding_model = setup_for_inference(model_path, device)
 maxsr_model.eval()  # Set the model to inference mode
 patch_embedding_model.eval()
 
 # do inference
 image_path = "/home/linuxu/Documents/test-images/random1.jpg"
-test_image = "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/0064.png"
-output = do_inference(test_image, device)
+output = do_inference(image_path, device)
 
 # Process or print the final output
 print(output.shape)
-image_name = "/home/linuxu/Documents/model-output-images/reconstructed-0064.png"
+image_name = "/home/linuxu/Documents/model-output-images/reconstructed-ramdom1.png"
 save_tensor_as_image(tensor=output, file_path=image_name)

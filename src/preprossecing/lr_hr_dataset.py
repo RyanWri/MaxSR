@@ -58,8 +58,8 @@ class PrecomputedEmbeddingDataset(Dataset):
         self.hr_images = []
         self.embeddings = []
 
-        # currently training on 300 images
-        for image_name in os.listdir(hr_dir)[:300]:
+        # currently training on 100 images
+        for image_name in os.listdir(hr_dir)[:100]:
             # HR images as tensors
             hr_image = Image.open(os.path.join(hr_dir, image_name)).convert("RGB")
             hr_image = self.transform(hr_image)
