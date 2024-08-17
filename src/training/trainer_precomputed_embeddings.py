@@ -5,11 +5,9 @@ from torch.utils.data import DataLoader
 import os
 from model.max_sr_model import MaxSRModel
 from utils.utils import (
-    calculate_np_mae_loss,
     generate_run_id,
     load_config,
     save_checkpoint,
-    save_torch_model,
 )
 from patches_extractor.embedding import PatchEmbedding
 import time
@@ -17,9 +15,7 @@ from preprossecing.lr_hr_dataset import PrecomputedEmbeddingDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
-    calculate_psnr,
     calculate_psnr_ssim_metrics,
-    calculate_ssim,
     log_metrics_to_json,
 )
 
@@ -70,7 +66,7 @@ if __name__ == "__main__":
     epochs = 100000
 
     # Initialize EarlyStopping
-    early_stopping = EarlyStopping(patience=20, min_delta=0.01)
+    early_stopping = EarlyStopping(patience=30, min_delta=0.01)
 
     for epoch in range(1, epochs + 1):
         model.train()
