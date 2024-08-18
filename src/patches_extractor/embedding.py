@@ -10,14 +10,6 @@ import numpy as np
 logger = logging.getLogger("my_application")
 
 
-# Load an image and convert it to a tensor
-def load_image(image_path):
-    transform = transforms.Compose([transforms.ToTensor()])
-    image = Image.open(image_path).convert("RGB")
-    image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
-    return image_tensor
-
-
 # precomputed embeddings for a single image with 64 patches to a representating vector
 def embed_image(image_absolute_path, model, device, transform):
     # open image

@@ -4,6 +4,8 @@ import torch
 import datetime
 import os
 import logging.config
+from torchvision import transforms
+from PIL import Image
 
 
 # Choose the nearest power of two greater than the most common height
@@ -68,3 +70,11 @@ def save_checkpoint(state, run_id, epoch, keep_last):
     # Keep only the last `keep_last` models
     while len(checkpoints) > keep_last:
         os.remove(os.path.join(checkpoint_dir, checkpoints.pop(0)))
+
+
+# Load an image and convert it to a tensor
+def load_image(image_path):
+    transform = transforms.Compose([transforms.ToTensor()])
+    image = Image.open(image_path).convert("RGB")
+    image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
+    return image_tensor

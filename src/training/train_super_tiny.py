@@ -5,6 +5,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader
 import os
 from model.max_sr_model import MaxSRModel
+from model.maxsr_tiny import MaxSRTiny
 from utils.utils import (
     generate_run_id,
     load_config,
@@ -12,7 +13,7 @@ from utils.utils import (
 )
 from patches_extractor.embedding import ImageEmbedding, PatchEmbedding
 import time
-from preprossecing.lr_hr_dataset import PrecomputedEmbeddingDataset
+from preprossecing.lr_hr_dataset import LRHRDataset, PrecomputedEmbeddingDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
@@ -38,20 +39,13 @@ if __name__ == "__main__":
     hr_dir = "/home/linuxu/Documents/datasets/Tiny_HR"
     lr_dir = "/home/linuxu/Documents/datasets/Tiny_LR"
 
-    # Initialize the PatchEmbedding module
-    patch_embedding_model = ImageEmbedding(
-        patch_size=config["patch_size"],
-        embedding_dim=config["emb_size"],
-        num_patches=config["num_patches"],
-    ).to(device)
-
     # Get pairs of LR images and HR images
-    dataset = PrecomputedEmbeddingDataset(lr_dir, hr_dir, patch_embedding_model)
+    dataset = LRHRDataset(lr_dir, hr_dir)
     # DataLoader
     data_loader = DataLoader(dataset, batch_size=1, shuffle=True, pin_memory=True)
 
     # Instantiate model
-    model = MaxSRModel(config).to(device)
+    model = MaxSRTiny().to(device)
 
     # Loss and Optimizer
     criterion = nn.L1Loss()
