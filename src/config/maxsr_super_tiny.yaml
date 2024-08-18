@@ -10,9 +10,9 @@ model_config:
   scale_factor: 2 # This represents the upscaling factor for spatial dimensions
   block_size: 8 # Example block size for attention mechanisms
   dim: 256 # Dimension for transformer embeddings, matching SFEB output
-  num_features: 1
-  stages: 1
-  block_per_stage: 1
+  num_features: 2
+  stages: 2
+  block_per_stage: 2
   final_image_size: 128
   patch_target_size: 16 # after reconstruction each patch is (patch size * scale factor)
   hidden_features: 128

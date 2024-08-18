@@ -3,7 +3,7 @@ from PIL import Image
 from torch.utils.data import Dataset, DataLoader
 from torchvision.transforms import ToTensor
 import torch
-from patches_extractor.embedding import embed_image
+from patches_extractor.embedding import embed_image, embed_image_sin_cosine
 
 
 class LRHRDataset(Dataset):
@@ -58,8 +58,7 @@ class PrecomputedEmbeddingDataset(Dataset):
         self.hr_images = []
         self.embeddings = []
 
-        # currently training on 100 images
-        for image_name in os.listdir(hr_dir)[:100]:
+        for image_name in os.listdir(hr_dir):
             # HR images as tensors
             hr_image = Image.open(os.path.join(hr_dir, image_name)).convert("RGB")
             hr_image = self.transform(hr_image)
@@ -67,7 +66,9 @@ class PrecomputedEmbeddingDataset(Dataset):
 
             # Embeddings
             lr_image_path = os.path.join(lr_dir, image_name)
-            embeded_image = embed_image(lr_image_path, model, device, self.transform)
+            embeded_image = embed_image_sin_cosine(
+                lr_image_path, model, patch_size=8, device=device
+            )
             self.embeddings.append(embeded_image)
 
         # Ensure that both folders have the same number of files and match each other

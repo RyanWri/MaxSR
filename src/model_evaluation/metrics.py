@@ -3,8 +3,7 @@ from skimage.metrics import peak_signal_noise_ratio as psnr
 from skimage.metrics import structural_similarity as ssim
 import json
 import os
-import torch
-import torchmetrics
+from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
 
 
 def calculate_psnr(output, target):
@@ -85,10 +84,8 @@ def calculate_psnr_ssim_metrics(output, target, device):
     data_range = target.max() - target.min()
 
     # Initialize the metrics with the calculated data range
-    psnr_metric = torchmetrics.PeakSignalNoiseRatio(data_range=data_range).to(device)
-    ssim_metric = torchmetrics.StructuralSimilarityIndexMeasure(
-        data_range=data_range
-    ).cuda(device)
+    psnr_metric = PeakSignalNoiseRatio(data_range=data_range).to(device)
+    ssim_metric = StructuralSimilarityIndexMeasure(data_range=data_range).cuda(device)
 
     # Calculate PSNR
     psnr_value = psnr_metric(output, target)
