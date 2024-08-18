@@ -2,7 +2,7 @@ import torch.nn as nn
 from components.sfeb import ShallowFeatureExtractionBlock
 from components.amtb.amtb import AdaptiveMaxViTBlock
 from components.hffb import HierarchicalFeatureFusionBlock
-from components.reconstruction_block import ReconstructionBlock
+from components.reconstruction_block_super_tiny import ReconstructionBlockTiny
 
 
 class MaxSRModel(nn.Module):
@@ -27,11 +27,11 @@ class MaxSRModel(nn.Module):
             out_features=config["emb_size"],
         )
         # Adjust scale_factor as needed
-        self.reconstruction_block = ReconstructionBlock(
-            embed_dim=config["dim"],
-            num_patches=config["num_patches"],
-            final_image_size=config["final_image_size"],
-            patch_target_size=config["patch_target_size"],
+        self.reconstruction_block = ReconstructionBlockTiny(
+            embedding_dim=config["dim"],
+            patch_size=config["patch_size"],
+            image_size=config["input_image_size"],
+            scale_factor=config["scale_factor"],
         )
 
     def forward(self, x):

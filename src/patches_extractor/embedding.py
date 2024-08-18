@@ -2,21 +2,12 @@ from torchvision import transforms
 from PIL import Image
 import torch
 import torch.nn as nn
-import os
-from model.max_sr_model import MaxSRModel
-from utils.utils import setup_logging, load_config
 import logging
 import torch.cuda.amp as amp
+import matplotlib.pyplot as plt
+import numpy as np
 
 logger = logging.getLogger("my_application")
-
-
-# Load an image and convert it to a tensor
-def load_image(image_path):
-    transform = transforms.Compose([transforms.ToTensor()])
-    image = Image.open(image_path).convert("RGB")
-    image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
-    return image_tensor
 
 
 # precomputed embeddings for a single image with 64 patches to a representating vector
@@ -73,46 +64,83 @@ class PatchEmbedding(nn.Module):
         return x
 
 
-if __name__ == "__main__":
-    # Call this at the start of your application to turn on/off logs
-    setup_logging(os.path.join(os.getcwd(), "config", "logging_conf.yaml"))
+class SineCosinePositionalEncoding(nn.Module):
+    def __init__(self, embedding_dim, num_patches):
+        super(SineCosinePositionalEncoding, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.num_patches = num_patches
+        self.positional_encoding = self.create_positional_encoding()
 
-    # Assuming an image path is specified
-    image_path = (
-        "/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x4/0015.png"
-    )
-    image_tensor = load_image(image_path)
+    def create_positional_encoding(self):
+        # Create the sine-cosine positional encodings
+        position = np.arange(self.num_patches)[:, np.newaxis]
+        div_term = np.exp(
+            np.arange(0, self.embedding_dim, 2)
+            * -(np.log(10000.0) / self.embedding_dim)
+        )
+        pos_enc = np.zeros((self.num_patches, self.embedding_dim))
+        pos_enc[:, 0::2] = np.sin(position * div_term)
+        pos_enc[:, 1::2] = np.cos(position * div_term)
+        return torch.from_numpy(pos_enc).float().unsqueeze(0)  # Add batch dimension
 
-    # Initialize the PatchEmbedding module
-    patch_embedding = PatchEmbedding(patch_size=64, emb_size=768, num_patches=64)
+    def forward(self, x):
+        # x shape: (batch_size, num_patches, embedding_dim)
+        return x + self.positional_encoding.to(x.device)
 
-    # Move to the appropriate device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    image_tensor = image_tensor.to(device)
-    patch_embedding = patch_embedding.to(device)
 
-    # Apply the patch embedding module
-    embedded_patches = patch_embedding(image_tensor)
+class ImageEmbedding(nn.Module):
+    def __init__(self, patch_size, embedding_dim, num_patches):
+        super(ImageEmbedding, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.num_patches = num_patches
+        self.projection = nn.Linear(patch_size * patch_size * 3, embedding_dim)
+        self.positional_encoding = SineCosinePositionalEncoding(
+            embedding_dim, num_patches
+        )
 
-    # Print out the shape of the output tensor
-    print("Shape of embedded patches:", embedded_patches.shape)
+    def forward(self, x):
+        # Flatten and project patches
+        x = x.view(
+            x.size(0), x.size(1), -1
+        )  # (batch_size, num_patches, patch_size * patch_size * 3)
+        x = self.projection(x)  # Linear projection (embedding)
 
-    # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
-        "model_config"
-    ]
-    max_sr_model = MaxSRModel(config)
-    model_version = "20240815_170500/2.pth"
-    model_path = f"/home/linuxu/Documents/models/MaxSR/{model_version}"
-    max_sr_model.load_state_dict(torch.load(model_path))
+        # Add positional encodings
+        x = self.positional_encoding(x)
 
-    max_sr_model.to(device)
-    max_sr_model.eval()
+        return x
 
-    with amp.autocast():
-        output = max_sr_model(embedded_patches)
 
-    print("Shape of MaxSR Model output is:", output.shape)
-    final_image = output.detach().cpu()
-    filepath = "/home/linuxu/Documents/model-output-images/reconstructed_0015.png"
-    # tensor_to_image(final_image, filepath)
+def embed_image_sin_cosine(image_absolute_path, model, patch_size, device):
+    """
+    Embed an RGB image into patches, apply linear projection, and add positional encodings.
+
+    Args:
+        image (torch.Tensor): Input image tensor of shape (1, 3, H, W).
+        model (nn.Module): Vision Transformer model with embedding and positional encoding layers.
+        patch_size (int): The size of each patch (default: 8).
+        embedding_dim (int): The dimension of the embedding space (default: 256).
+
+    Returns:
+        torch.Tensor: Embedded image patches with positional encodings, shape (1, num_patches, embedding_dim).
+    """
+    transform = transforms.Compose([transforms.ToTensor()])
+    lr_image = Image.open(image_absolute_path).convert("RGB")
+    lr_image = transform(lr_image)
+    image = lr_image.unsqueeze(0).to(device)
+
+    # Unfold the image into patches
+    patches = image.unfold(2, patch_size, patch_size).unfold(3, patch_size, patch_size)
+    patches = patches.contiguous().view(
+        1, 3, -1, patch_size, patch_size
+    )  # (1, 3, num_patches, patch_size, patch_size)
+    patches = patches.permute(
+        0, 2, 1, 3, 4
+    )  # (1, num_patches, 3, patch_size, patch_size)
+    patches = patches.contiguous().view(
+        1, patches.size(1), -1
+    )  # (1, num_patches, 3 * patch_size * patch_size)
+
+    # Pass the patches through the model (embedding + positional encoding)
+    embedded_patches = model(patches).detach().cpu()
+    return embedded_patches.squeeze(0)

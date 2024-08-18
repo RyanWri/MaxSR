@@ -336,17 +336,3 @@ class MaxSRTiny(nn.Module):
         output_image = self.reconstruction(fused_features)
 
         return output_image
-
-
-if __name__ == "__main__":
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # Test the MaxSR model with a dummy input
-    maxsr_model = MaxSRTiny().to(device)
-    dummy_image = torch.randn(1, 3, 64, 64).to(device)
-    output_image = maxsr_model(dummy_image)
-
-    # Print the shape of the output patches
-    print(
-        f"Output patches shape after Transformer: {output_image.shape}"
-    )  # Should be (1, 3, 128, 128)

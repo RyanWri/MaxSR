@@ -1,5 +1,6 @@
 from PIL import Image
 import os
+import requests
 
 
 def downscale_images(source_folder, target_folder, scale_factor=4):
@@ -45,3 +46,21 @@ def transform_padded_HR_images_to_LR_images(src_folder: str, scale_factor: int) 
     target_dir = f"{base_dataset_path}/{ouput_lr_dir}"
 
     downscale_images(src_dir, target_dir, scale_factor=4)
+
+
+def generate_random_image():
+    for i in range(100):
+        resp = requests.get("https://picsum.photos/128")
+        if resp.ok:
+            with open(
+                f"/home/linuxu/Documents/datasets/Tiny_HR/{i}.jpeg", mode="wb"
+            ) as fp:
+                fp.write(resp.content)
+
+
+if __name__ == "__main__":
+    downscale_images(
+        source_folder="/home/linuxu/Documents/datasets/Tiny_HR",
+        target_folder="/home/linuxu/Documents/datasets/Tiny_LR",
+        scale_factor=2,
+    )
