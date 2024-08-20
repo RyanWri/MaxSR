@@ -9,9 +9,8 @@ from utils.utils import (
     load_config,
     save_checkpoint,
 )
-from patches_extractor.embedding import PatchEmbedding
 import time
-from preprossecing.lr_hr_dataset import LRHRDataset, PrecomputedEmbeddingDataset
+from preprossecing.lr_hr_dataset import LRHRDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
@@ -58,7 +57,7 @@ if __name__ == "__main__":
     epochs = 100000
 
     # Initialize EarlyStopping
-    early_stopping = EarlyStopping(patience=15, min_delta=0.01)
+    early_stopping = EarlyStopping(patience=30, min_delta=0.01)
 
     for epoch in range(1, epochs + 1):
         model.train()
