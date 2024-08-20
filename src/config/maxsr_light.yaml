@@ -1,21 +1,20 @@
 model_config:
-  patch_size: 64
+  patch_size: 128
   num_patches: 64
   output_size: 2048
   channels: 3
   emb_size: 768
   num_heads: 8
   depth: 6
-  scale_factor: 4 # This represents the upscaling factor for spatial dimensions
+  scale_factor: 2 # This represents the upscaling factor for spatial dimensions
   block_size: 8 # Example block size for attention mechanisms
   dim: 768 # Dimension for transformer embeddings, matching SFEB output
   num_features: 4
-  stages: 4
-  block_per_stage: 2
+  stages: 1
+  block_per_stage: 1
   final_image_size: 2048
   patch_target_size: 256 # after reconstruction each patch is (patch size * scale factor)
   hidden_features: 512
-
 
 paths:
   base_dir: /home/linuxu/Documents/models/MaxSR-light
