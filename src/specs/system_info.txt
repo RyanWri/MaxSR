@@ -1,0 +1,26 @@
+GPU 0: GRID P40-8Q
+  - Total Memory: 8.00 GB
+  - Memory Reserved: 0.00 GB
+  - Memory Allocated: 0.00 GB
+  - Memory Free: 8.00 GB
+
+CPU: x86_64
+Cores: 4 physical, 4 logical
+Max Frequency: 0.00 MHz
+Current Frequency: 2996.53 MHz
+CPU Usage: 9.2%
+
+Total Memory: 31.34 GB
+Available Memory: 27.26 GB
+Used Memory: 3.59 GB
+Memory Usage: 13.0%
+
+Total Disk Space: 117.06 GB
+Used Disk Space: 55.43 GB
+Free Disk Space: 55.64 GB
+Disk Usage: 49.9%
+
+Operating System: Linux 5.19.0-46-generic #47~22.04.1-Ubuntu SMP PREEMPT_DYNAMIC Wed Jun 21 15:35:31 UTC 2
+Machine: x86_64
+Node Name: Ubuntu-GPU-48
+Python Version: 3.10.12

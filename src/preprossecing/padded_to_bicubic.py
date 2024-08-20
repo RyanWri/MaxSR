@@ -45,7 +45,7 @@ def transform_padded_HR_images_to_LR_images(src_folder: str, scale_factor: int) 
     ouput_lr_dir = src_folder + f"_lr_bicubic_x{str(scale_factor)}"
     target_dir = f"{base_dataset_path}/{ouput_lr_dir}"
 
-    downscale_images(src_dir, target_dir, scale_factor=4)
+    downscale_images(src_dir, target_dir, scale_factor=scale_factor)
 
 
 def generate_random_image():
@@ -60,7 +60,7 @@ def generate_random_image():
 
 if __name__ == "__main__":
     downscale_images(
-        source_folder="/home/linuxu/Documents/datasets/Tiny_HR",
-        target_folder="/home/linuxu/Documents/datasets/Tiny_LR",
+        source_folder="/home/linuxu/Documents/datasets/div2k_train_pad",
+        target_folder="/home/linuxu/Documents/datasets/div2k_train_pad_lr_bicubic_x2",
         scale_factor=2,
     )

@@ -3,15 +3,14 @@ import torch
 from torch import nn, optim
 from torch.utils.data import DataLoader
 import os
-from model.max_sr_model import MaxSRModel
+from model.maxsr_tiny import MaxSRTiny
 from utils.utils import (
     generate_run_id,
     load_config,
     save_checkpoint,
 )
-from patches_extractor.embedding import PatchEmbedding
 import time
-from preprossecing.lr_hr_dataset import PrecomputedEmbeddingDataset
+from preprossecing.lr_hr_dataset import LRHRDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
@@ -25,33 +24,25 @@ if __name__ == "__main__":
     start = time.time()
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
-        "model_config"
-    ]
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))
+    model_config = config["model_config"]
+    paths = config["paths"]
 
     # High resoultion folder (3,128,128)
     # Low resolution folder (3,64,64)
     hr_dir = "/home/linuxu/Documents/datasets/Tiny_HR"
     lr_dir = "/home/linuxu/Documents/datasets/Tiny_LR"
 
-    # Initialize the PatchEmbedding module
-    patch_embedding_model = PatchEmbedding(
-        patch_size=config["patch_size"],
-        emb_size=config["emb_size"],
-        num_patches=config["num_patches"],
-    )
-
     # Move to the appropriate device
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    patch_embedding = patch_embedding_model.to(device)
 
     # Get pairs of LR images and HR images
-    dataset = PrecomputedEmbeddingDataset(lr_dir, hr_dir, patch_embedding_model)
+    dataset = LRHRDataset(lr_dir, hr_dir)
     # DataLoader
     data_loader = DataLoader(dataset, batch_size=1, shuffle=True, pin_memory=True)
 
     # Instantiate model
-    model = MaxSRModel(config).to(device)
+    model = MaxSRTiny(model_config).to(device)
 
     # Loss and Optimizer
     criterion = nn.L1Loss()
@@ -108,6 +99,7 @@ if __name__ == "__main__":
 
         # Log metrics for this iteration
         log_metrics_to_json(
+            paths=paths,
             run_id=run_id,
             epoch=epoch,
             loss=epoch_loss,
@@ -126,7 +118,9 @@ if __name__ == "__main__":
         # save the model checkpoint if there is an improvment
         if early_stopping.counter == 0:
             print(f"Saving model checkpoint at epoch {epoch}")
-            save_checkpoint(model.state_dict(), run_id=run_id, epoch=epoch, keep_last=5)
+            save_checkpoint(
+                paths, model.state_dict(), run_id=run_id, epoch=epoch, keep_last=5
+            )
             print(f"Model saved at epoch {epoch}")
 
     print("Training complete.")

@@ -268,39 +268,46 @@ class ReconstructionBlock(nn.Module):
 
 # Define the MaxSR Model
 class MaxSRSuperTiny(nn.Module):
-    def __init__(
-        self,
-        patch_size=8,
-        embed_dim=256,
-        num_heads=4,
-        expansion_factor=4,
-        se_ratio=0.25,
-        mlp_dim=256,
-    ):
+    def __init__(self, config):
         super(MaxSRSuperTiny, self).__init__()
+        self.patch_size = config["patch_size"]
+        self.embed_dim = config["emb_size"]
+        self.num_heads = config["num_heads"]
+        self.mlp_dim = config["dim"]
+        self.expansion_factor = 4
+        self.se_ratio = 0.25
         self.sfe = ShallowFeatureExtractor()
-        self.patch_size = patch_size
-        self.embed_dim = embed_dim
-
         # Patch embedding layer
-        self.patch_embeddings = nn.Linear(64 * patch_size * patch_size, embed_dim)
-
-        # Positional embedding layer
-        self.num_patches = (64 // patch_size) * (
-            64 // patch_size
-        )  # Assuming input size (64, 64)
-        self.positional_embedding = PositionalEmbedding(self.num_patches, embed_dim)
-
-        # Adaptive MaxViT Block
-        self.adaptive_maxvit_block = AdaptiveMaxViTBlock(
-            embed_dim, num_heads, expansion_factor, se_ratio, mlp_dim
+        self.patch_embeddings = nn.Linear(
+            64 * self.patch_size * self.patch_size, self.embed_dim
         )
 
-        self.hffb = HFFB(embed_dim=embed_dim, num_stages=1)
+        # Positional embedding layer
+        self.num_patches = config["num_patches"]
+        self.positional_embedding = PositionalEmbedding(
+            self.num_patches, self.embed_dim
+        )
+
+        # Adaptive MaxViT Blocks
+        blocks = tuple(
+            AdaptiveMaxViTBlock(
+                self.embed_dim,
+                self.num_heads,
+                self.expansion_factor,
+                self.se_ratio,
+                self.mlp_dim,
+            )
+            for _ in range(config["block_per_stage"])
+        )
+        self.stages = nn.ModuleList(
+            [nn.Sequential(*blocks) for _ in range(config["stages"])]
+        )
+
+        self.hffb = HFFB(embed_dim=self.embed_dim, num_stages=config["stages"])
 
         # Reconstruction block
         self.reconstruction = ReconstructionBlock(
-            embed_dim, self.num_patches, patch_size, 3
+            self.embed_dim, self.num_patches, self.patch_size, 3
         )
 
     def forward(self, x):
@@ -327,10 +334,17 @@ class MaxSRSuperTiny(nn.Module):
         patches = self.positional_embedding(patches)
 
         # Step 5: Process through Adaptive MaxViT Block (Transformer Encoder)
-        patches = self.adaptive_maxvit_block(patches)
+        # Step 5: Process through Adaptive MaxViT Block (Transformer Encoder)
+        x = patches
+        features = []
+        for stage in self.stages:
+            for block in stage:
+                x = block(x)
+            # Collect the output from the last block of each stage
+            features.append(x)
 
         # Step 6: Process through HFFB
-        fused_features = self.hffb([patches])
+        fused_features = self.hffb(features)
 
         # Step 7: Process through Reconstruction Block
         output_image = self.reconstruction(fused_features)

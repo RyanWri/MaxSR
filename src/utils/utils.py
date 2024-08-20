@@ -49,12 +49,12 @@ def setup_logging(logging_config_path: str) -> None:
         logging.config.dictConfig(config)
 
 
-def save_checkpoint(state, run_id, epoch, keep_last):
+def save_checkpoint(paths, state, run_id, epoch, keep_last):
     """
     store model state dict as checkpoint, no more than {keep_last} models in folder for memory
     """
-    base_dir = "/home/linuxu/Documents/models/MaxSR-Tiny/"
-    checkpoint_dir = f"{base_dir}/{run_id}/model-checkpoints"
+    base_dir = paths["base_dir"]
+    checkpoint_dir = f"{base_dir}/{run_id}/{paths['checkpoints']}"
     if not os.path.exists(checkpoint_dir):
         os.makedirs(checkpoint_dir)
 

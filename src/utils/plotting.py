@@ -68,3 +68,22 @@ def tensor_to_RGB_image(tensor):
     image_tensor = torch.clamp(image_tensor, 0, 255)
     image_tensor = image_tensor.detach().cpu().byte().numpy()
     return image_tensor
+
+
+def plot_images_side_by_side(first_img, second_img):
+    # Plot the images side by side
+    plt.figure(figsize=(12, 6))
+
+    # Plot Low Resolution Image
+    plt.subplot(1, 2, 1)
+    plt.imshow(first_img)
+    plt.title("Low Resolution Image")
+    plt.axis("off")
+
+    # Plot High Resolution Image
+    plt.subplot(1, 2, 2)
+    plt.imshow(second_img)
+    plt.title("High Resolution Image")
+    plt.axis("off")
+
+    plt.show()

@@ -48,7 +48,7 @@ class EarlyStopping:
                 self.early_stop = True
 
 
-def log_metrics_to_json(run_id, epoch, loss, psnr, ssim, total_time):
+def log_metrics_to_json(paths, run_id, epoch, loss, psnr, ssim, total_time):
     # Create a dictionary for the current iteration's metrics
     log_entry = {
         "epoch": epoch,
@@ -59,8 +59,8 @@ def log_metrics_to_json(run_id, epoch, loss, psnr, ssim, total_time):
     }
 
     a = []
-    base_dir = "/home/linuxu/Documents/models/MaxSR-Tiny"
-    metrics_dir = f"{base_dir}/{run_id}/metrics"
+    base_dir = paths["base_dir"]
+    metrics_dir = f"{base_dir}/{run_id}/{paths['metrics']}"
 
     if not os.path.exists(metrics_dir):
         os.makedirs(metrics_dir)

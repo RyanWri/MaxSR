@@ -16,3 +16,11 @@ model_config:
   final_image_size: 128
   patch_target_size: 16 # after reconstruction each patch is (patch size * scale factor)
   hidden_features: 128
+
+
+paths:
+  base_dir: /home/linuxu/Documents/models/MaxSR-super-tiny
+  checkpoints: checkpoints/
+  metrics: metrics/
+  logs: logs/
+  profiler: profiler/
