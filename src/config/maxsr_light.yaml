@@ -1,7 +1,7 @@
 model_config:
   patch_size: 64
   num_patches: 64
-  output_size: 256
+  output_size: 2048
   channels: 3
   emb_size: 768
   num_heads: 8
@@ -14,4 +14,12 @@ model_config:
   block_per_stage: 2
   final_image_size: 2048
   patch_target_size: 256 # after reconstruction each patch is (patch size * scale factor)
-  hidden_features: 256
+  hidden_features: 512
+
+
+paths:
+  base_dir: /home/linuxu/Documents/models/MaxSR-light
+  checkpoints: checkpoints/
+  metrics: metrics/
+  logs: logs/
+  profiler: profiler/

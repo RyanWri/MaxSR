@@ -28,9 +28,9 @@ if __name__ == "__main__":
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_super_tiny.yaml"))[
-        "model_config"
-    ]
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_super_tiny.yaml"))
+    model_config = config["model_config"]
+    paths = config["paths"]
 
     # High resoultion folder (3,128,128)
     # Low resolution folder (3,64,64)
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     data_loader = DataLoader(dataset, batch_size=1, shuffle=True, pin_memory=True)
 
     # Instantiate model
-    model = MaxSRSuperTiny().to(device)
+    model = MaxSRSuperTiny(model_config).to(device)
 
     # Loss and Optimizer
     criterion = nn.L1Loss()
@@ -100,6 +100,7 @@ if __name__ == "__main__":
 
         # Log metrics for this iteration
         log_metrics_to_json(
+            paths=paths,
             run_id=run_id,
             epoch=epoch,
             loss=epoch_loss,
@@ -118,7 +119,9 @@ if __name__ == "__main__":
         # save the model checkpoint if there is an improvment
         if early_stopping.counter == 0:
             print(f"Saving model checkpoint at epoch {epoch}")
-            save_checkpoint(model.state_dict(), run_id=run_id, epoch=epoch, keep_last=5)
+            save_checkpoint(
+                paths, model.state_dict(), run_id=run_id, epoch=epoch, keep_last=5
+            )
             print(f"Model saved at epoch {epoch}")
 
     print("Training complete.")
