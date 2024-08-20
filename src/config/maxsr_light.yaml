@@ -10,8 +10,8 @@ model_config:
   block_size: 8 # Example block size for attention mechanisms
   dim: 768 # Dimension for transformer embeddings, matching SFEB output
   num_features: 4
-  stages: 1
-  block_per_stage: 1
+  stages: 4
+  block_per_stage: 2
   final_image_size: 2048
   patch_target_size: 256 # after reconstruction each patch is (patch size * scale factor)
   hidden_features: 512
