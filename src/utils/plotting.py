@@ -54,3 +54,17 @@ def save_tensor_as_image(tensor, file_path):
 
     # Save the image
     image.save(file_path)
+
+
+def tensor_to_RGB_image(tensor):
+    # Squeeze the tensor to remove the batch dimension
+    image_tensor = tensor.squeeze(0)  # This changes the shape to (3, 2048, 2048)
+
+    # Convert the tensor to a PIL Image
+    # Transpose the tensor to have (H, W, C) format from (C, H, W)
+    image_tensor = image_tensor.permute(1, 2, 0)
+    # Scale the tensor from 0-1 (if necessary) and convert to uint8
+    image_tensor = image_tensor * 255  # Assuming the tensor is scaled between 0 and 1
+    image_tensor = torch.clamp(image_tensor, 0, 255)
+    image_tensor = image_tensor.detach().cpu().byte().numpy()
+    return image_tensor

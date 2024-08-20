@@ -25,7 +25,7 @@ if __name__ == "__main__":
     start = time.time()
 
     # Load configuration
-    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_super_tiny.yaml"))[
+    config = load_config(os.path.join(os.getcwd(), "config", "maxsr_tiny.yaml"))[
         "model_config"
     ]
 

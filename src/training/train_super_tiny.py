@@ -4,16 +4,14 @@ from torch.profiler import profile, record_function, ProfilerActivity
 from torch import nn, optim
 from torch.utils.data import DataLoader
 import os
-from model.max_sr_model import MaxSRModel
-from model.maxsr_tiny import MaxSRTiny
+from model.maxsr_super_tiny import MaxSRSuperTiny
 from utils.utils import (
     generate_run_id,
     load_config,
     save_checkpoint,
 )
-from patches_extractor.embedding import ImageEmbedding, PatchEmbedding
 import time
-from preprossecing.lr_hr_dataset import LRHRDataset, PrecomputedEmbeddingDataset
+from preprossecing.lr_hr_dataset import LRHRDataset
 from training.cuda_cleaner import clean_cuda_memory_by_threshold
 from model_evaluation.metrics import (
     EarlyStopping,
@@ -45,7 +43,7 @@ if __name__ == "__main__":
     data_loader = DataLoader(dataset, batch_size=1, shuffle=True, pin_memory=True)
 
     # Instantiate model
-    model = MaxSRTiny().to(device)
+    model = MaxSRSuperTiny().to(device)
 
     # Loss and Optimizer
     criterion = nn.L1Loss()
